@@ -17,7 +17,7 @@ import org.opencv.core.Mat;
 public class SpencerActivity extends Activity implements CvCameraViewListener2 {
 
     private static final String TAG = "SpencerActivity";
-    private CameraBridgeViewBase mOpenCvCameraView;
+    private PortraitCameraView mOpenCvCameraView;
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -49,7 +49,7 @@ public class SpencerActivity extends Activity implements CvCameraViewListener2 {
         super.onCreate(savedInstanceState);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_spencer);
-        mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.HelloOpenCvView);
+        mOpenCvCameraView = (PortraitCameraView) findViewById(R.id.HelloOpenCvView);
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
         mOpenCvCameraView.setCvCameraViewListener(this);
     }
