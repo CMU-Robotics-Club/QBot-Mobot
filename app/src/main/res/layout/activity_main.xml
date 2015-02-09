@@ -11,10 +11,19 @@
         android:layout_height="wrap_content" />
 
     <Button
+        android:id="@+id/button_edward"
         android:layout_below="@+id/text"
         android:text="Press me"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:onClick="startactivity_edward_activity"/>
+
+    <Button
+        android:id="@+id/btn_spencer"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_spencer"
+        android:onClick="startSpencerActivity"
+        android:layout_below="@+id/button_edward" />
 
 </RelativeLayout>

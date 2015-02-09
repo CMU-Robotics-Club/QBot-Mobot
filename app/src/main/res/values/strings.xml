@@ -4,6 +4,11 @@
     <string name="app_name">QBot</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+<<<<<<< HEAD
     <string name="title_activity_edward_activity">edward_activity</string>
+=======
+    <string name="title_activity_spencer">SpencerActivity</string>
+    <string name="btn_spencer">Spencer\'s Activity</string>
+>>>>>>> 4d4eb25a8b9b42c4d0e44e64f870f01603b507e4
 
 </resources>
