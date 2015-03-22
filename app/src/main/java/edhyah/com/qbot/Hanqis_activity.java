@@ -13,8 +13,6 @@ import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Mat;
-
-import edhyah.com.qbot.R;
 import hanqis.com.qbot.Sample_algorithm;
 
 public class Hanqis_activity extends Activity implements CameraBridgeViewBase.CvCameraViewListener2 {
