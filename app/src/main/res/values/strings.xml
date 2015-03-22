@@ -10,5 +10,9 @@
     <string name="title_activity_edward_activity">edward_activity</string>
     <string name="title_activity_spencer">SpencerActivity</string>
     <string name="btn_spencer">Spencer\'s Activity</string>
+    <string name="edward_activity">Edward\'s Activity</string>
+    <string name="qbot_welcome">QBot Mobot Application</string>
+    <string name="btn_mobot">Mobot Activity</string>
+    <string name="title_activity_mobot">MobotActivity</string>
 
 </resources>

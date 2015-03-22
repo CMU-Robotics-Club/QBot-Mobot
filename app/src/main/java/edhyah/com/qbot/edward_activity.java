@@ -58,11 +58,11 @@ public class edward_activity extends Activity implements CameraBridgeViewBase.Cv
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
 
         Mat img = inputFrame.gray();
-        Mat lines;
+        Mat lines = new Mat();
         Imgproc.HoughLinesP(img, lines, 1, Math.PI/180, 100);
         Size size = lines.size();
         for (int i = 0; i < size.width; i++) {
-
+            // TODO
         }
         return inputFrame.rgba();
     }
