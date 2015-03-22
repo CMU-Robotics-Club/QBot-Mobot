@@ -18,7 +18,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="hanqis.com.qbot.Hanqis_activity"
+            android:name=".Hanqis_activity"
             android:label="@string/title_activity_hanqis_activity" >
             </activity>
         <activity
@@ -26,8 +26,8 @@
             android:label="@string/title_activity_edward_activity" >
         </activity>
         <activity
-            android:name=".SpencerActivity"
-            android:label="@string/title_activity_spencer" >
+            android:name=".MobotActivity"
+            android:label="@string/title_activity_mobot" >
         </activity>
     </application>
 

@@ -8,12 +8,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
-
-import hanqis.com.qbot.Hanqis_activity;
-
 public class MainActivity extends Activity {
-
-    private Button mHanqisButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,8 +49,8 @@ public class MainActivity extends Activity {
         startActivity(intent);
     }
 
-    public void startSpencerActivity(View view) {
-        Intent intent = new Intent(this, SpencerActivity.class);
+    public void startMobotActivity(View view) {
+        Intent intent = new Intent(this, MobotActivity.class);
         startActivity(intent);
     }
 }
