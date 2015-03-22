@@ -2,6 +2,7 @@ package hanqis.com.qbot;
 
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
@@ -26,7 +27,10 @@ public class Sample_algorithm {
         int adjHeight = vidHeight / scale;
         int adjWidth = vidWidth / scale;
         Mat vidHsv = new Mat();
-        Imgproc.cvtColor(vidHsv, vidRgb, Imgproc.COLOR_BGR2HSV);
+        Mat vidRgbAdj = new Mat();
+        Size sz = new Size(adjWidth,adjHeight);
+        Imgproc.resize(vidRgb,vidRgbAdj,sz);
+        Imgproc.cvtColor(vidHsv, vidRgbAdj, Imgproc.COLOR_BGR2HSV);
 
         List<Mat> hsv_planes = new ArrayList<Mat>();
         Core.split(vidHsv, hsv_planes);
@@ -42,6 +46,7 @@ public class Sample_algorithm {
         int[] ysub = ind2suby(adjWidth,amount,randompoints);
 
         //Not finished.
+
 
 
         return angle;
