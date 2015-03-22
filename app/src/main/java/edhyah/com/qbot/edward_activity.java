@@ -14,6 +14,8 @@ import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Mat;
+import org.opencv.core.Size;
+import org.opencv.imgproc.Imgproc;
 
 
 public class edward_activity extends Activity implements CameraBridgeViewBase.CvCameraViewListener2 {
@@ -54,6 +56,14 @@ public class edward_activity extends Activity implements CameraBridgeViewBase.Cv
     }
 
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+
+        Mat img = inputFrame.gray();
+        Mat lines;
+        Imgproc.HoughLinesP(img, lines, 1, Math.PI/180, 100);
+        Size size = lines.size();
+        for (int i = 0; i < size.width; i++) {
+
+        }
         return inputFrame.rgba();
     }
 
@@ -78,7 +88,7 @@ public class edward_activity extends Activity implements CameraBridgeViewBase.Cv
     public void onResume()
     {
         super.onResume();
-        OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_6, this, mLoaderCallback);
+        OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_9, this, mLoaderCallback);
     }
 
 
