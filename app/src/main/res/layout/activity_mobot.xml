@@ -7,8 +7,8 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:visibility="gone"
-        android:id="@+id/HelloOpenCvView"
-        opencv:show_fps="true"
+        android:id="@+id/video_surface"
+        opencv:show_fps="false"
         opencv:camera_id="any" />
 
 </LinearLayout>

@@ -1,4 +1,4 @@
-package hanqis.com.qbot;
+package edhyah.com.qbot;
 
 import android.app.Activity;
 import android.os.Bundle;
