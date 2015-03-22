@@ -15,14 +15,13 @@ import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Mat;
 
 import edhyah.com.qbot.R;
+import hanqis.com.qbot.Sample_algorithm;
 
 public class Hanqis_activity extends Activity implements CameraBridgeViewBase.CvCameraViewListener2 {
 
     private static final String TAG = "Hanqis Opencv Log";
 
     private CameraBridgeViewBase mOpenCvCameraView;
-    private int vidHeight;
-    private int vidWidth;
     private Sample_algorithm algo = new Sample_algorithm();
 
     @Override
@@ -51,8 +50,6 @@ public class Hanqis_activity extends Activity implements CameraBridgeViewBase.Cv
     }
 
     public void onCameraViewStarted(int width, int height) {
-        vidHeight = height;
-        vidWidth = width;
     }
 
     public void onCameraViewStopped() {
