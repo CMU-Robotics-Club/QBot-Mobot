@@ -6,9 +6,14 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 
+
+import hanqis.com.qbot.Hanqis_activity;
 
 public class MainActivity extends Activity {
+
+    private Button mHanqisButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +42,11 @@ public class MainActivity extends Activity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void start_Hanqis_activity(View v) {
+        Intent i = new Intent(this, Hanqis_activity.class);
+        startActivity(i);
     }
 
     public void startactivity_edward_activity(View view) {
