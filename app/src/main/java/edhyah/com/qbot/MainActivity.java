@@ -1,7 +1,7 @@
 package edhyah.com.qbot;
 
-import android.app.Activity;
 import android.content.Intent;
+import android.app.Activity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -47,6 +47,11 @@ public class MainActivity extends Activity {
     public void start_Hanqis_activity(View v) {
         Intent i = new Intent(this, Hanqis_activity.class);
         startActivity(i);
+    }
+
+    public void startactivity_edward_activity(View view) {
+        Intent intent = new Intent(this, edward_activity.class);
+        startActivity(intent);
     }
 
     public void startSpencerActivity(View view) {

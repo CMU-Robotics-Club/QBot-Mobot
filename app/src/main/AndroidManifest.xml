@@ -18,8 +18,14 @@
             </intent-filter>
         </activity>
         <activity
+<<<<<<< HEAD
             android:name="hanqis.com.qbot.Hanqis_activity"
             android:label="@string/title_activity_hanqis_activity" ></activity>
+=======
+            android:name=".edward_activity"
+            android:label="@string/title_activity_edward_activity" >
+        </activity>
+>>>>>>> 7c80b98f891a449b10f3da638715a2f425237c2c
         <activity
             android:name=".SpencerActivity"
             android:label="@string/title_activity_spencer" >
