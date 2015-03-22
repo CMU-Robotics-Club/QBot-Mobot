@@ -21,6 +21,9 @@ public class Hanqis_activity extends Activity implements CameraBridgeViewBase.Cv
     private static final String TAG = "Hanqis Opencv Log";
 
     private CameraBridgeViewBase mOpenCvCameraView;
+    private int vidHeight;
+    private int vidWidth;
+    private Sample_algorithm algo = new Sample_algorithm();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -48,12 +51,16 @@ public class Hanqis_activity extends Activity implements CameraBridgeViewBase.Cv
     }
 
     public void onCameraViewStarted(int width, int height) {
+        vidHeight = height;
+        vidWidth = width;
     }
 
     public void onCameraViewStopped() {
     }
 
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+        Mat imgRgb = inputFrame.rgba();
+        double angle = algo.Sampling(imgRgb);
         return inputFrame.rgba();
     }
 
