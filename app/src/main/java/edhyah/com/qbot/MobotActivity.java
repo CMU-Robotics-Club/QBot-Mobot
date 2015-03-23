@@ -17,7 +17,7 @@ import ioio.lib.util.android.IOIOActivity;
 public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.CvCameraViewListener2 {
 
     private static final String TAG = "MobotActivity";
-    private PortraitCameraView mOpenCvCameraView;
+    private PortraitCameraView mOpenCvCameraView; // TODO add a turn off button for when not debugging
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -84,6 +84,8 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
 
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+        // TODO processing algorithms
+        // TODO update driving directions
         return inputFrame.rgba();
     }
 }
