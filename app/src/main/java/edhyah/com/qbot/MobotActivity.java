@@ -1,6 +1,5 @@
 package edhyah.com.qbot;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.SurfaceView;
@@ -12,7 +11,10 @@ import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Mat;
 
-public class MobotActivity extends Activity implements CameraBridgeViewBase.CvCameraViewListener2 {
+import ioio.lib.util.IOIOLooper;
+import ioio.lib.util.android.IOIOActivity;
+
+public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.CvCameraViewListener2 {
 
     private static final String TAG = "MobotActivity";
     private PortraitCameraView mOpenCvCameraView;
@@ -60,10 +62,16 @@ public class MobotActivity extends Activity implements CameraBridgeViewBase.CvCa
             mOpenCvCameraView.disableView();
     }
 
+    @Override
     public void onDestroy() {
         super.onDestroy();
         if (mOpenCvCameraView != null)
             mOpenCvCameraView.disableView();
+    }
+
+    @Override
+    protected IOIOLooper createIOIOLooper() {
+        return null; // TODO create custom looper object that takes theta input and drives the mobot, also stops, calibrates
     }
 
     public void onCameraViewStarted(int width, int height) {
