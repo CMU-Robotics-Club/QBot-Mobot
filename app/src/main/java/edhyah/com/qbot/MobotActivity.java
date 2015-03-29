@@ -1,15 +1,20 @@
 package edhyah.com.qbot;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.SurfaceView;
 import android.view.WindowManager;
+import android.widget.TextView;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
+import org.opencv.core.Core;
 import org.opencv.core.Mat;
+import org.opencv.core.Point;
+import org.opencv.core.Scalar;
 
 import hanqis.com.qbot.Sample_algorithm;
 import ioio.lib.util.IOIOLooper;
@@ -19,6 +24,7 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
 
     private static final String TAG = "MobotActivity";
     private PortraitCameraView mOpenCvCameraView; // TODO add a turn off button for when not debugging
+
     private Sample_algorithm algo = new Sample_algorithm();
     private double angle;
 
@@ -52,6 +58,7 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         super.onCreate(savedInstanceState);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_mobot);
+        angle_output = (TextView) findViewById(R.id.angle_test);
         mOpenCvCameraView = (PortraitCameraView) findViewById(R.id.video_surface);
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
         mOpenCvCameraView.setCvCameraViewListener(this);
@@ -87,9 +94,23 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
 
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-        angle = algo.Sampling(inputFrame.rgba());
-        // TODO processing algorithms
+        Mat img = inputFrame.rgba();
+        int height = img.height();
+        int width = img.width();
+        angle = algo.Sampling(img);
+        updateAngle(Double.toString(angle));
+
+
+        Point p1 = new Point(height,width/2);
+        Point p2 = new Point(height / 2, Math.atan(angle) * (height / 2));
+        int red = Color.RED;
+        Core.arrowedLine(img,p1,p2,new Scalar(Color.red(red),Color.blue(red),Color.green(red)));
         // TODO update driving directions
         return inputFrame.rgba();
+    }
+
+    private void updateAngle(String s){
+        TextView angle = (TextView) findViewById(R.id.angle_test);
+        angle.setText(s);
     }
 }
