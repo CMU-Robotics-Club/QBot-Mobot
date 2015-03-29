@@ -14,7 +14,8 @@ import org.opencv.core.Mat;
 import ioio.lib.util.IOIOLooper;
 import ioio.lib.util.android.IOIOActivity;
 
-public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.CvCameraViewListener2 {
+public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.CvCameraViewListener2,
+        MobotLooper.MobotDriver {
 
     private static final String TAG = "MobotActivity";
     private PortraitCameraView mOpenCvCameraView; // TODO add a turn off button for when not debugging
@@ -71,7 +72,7 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
 
     @Override
     protected IOIOLooper createIOIOLooper() {
-        return null; // TODO create custom looper object that takes theta input and drives the mobot, also stops, calibrates
+        return new MobotLooper(this);
     }
 
     public void onCameraViewStarted(int width, int height) {
@@ -87,5 +88,17 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         // TODO processing algorithms
         // TODO update driving directions
         return inputFrame.rgba();
+    }
+
+    //------------ Driving Mobot -------------------------------------------
+
+    @Override
+    public double getDriveAngle() {
+        return 0.0;
+    }
+
+    @Override
+    public double getDriveSpeed() {
+        return 1.0;
     }
 }
