@@ -11,6 +11,7 @@ import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Mat;
 
+import hanqis.com.qbot.Sample_algorithm;
 import ioio.lib.util.IOIOLooper;
 import ioio.lib.util.android.IOIOActivity;
 
@@ -18,6 +19,8 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
 
     private static final String TAG = "MobotActivity";
     private PortraitCameraView mOpenCvCameraView; // TODO add a turn off button for when not debugging
+    private Sample_algorithm algo = new Sample_algorithm();
+    private double angle;
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -84,6 +87,7 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
 
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+        angle = algo.Sampling(inputFrame.rgba());
         // TODO processing algorithms
         // TODO update driving directions
         return inputFrame.rgba();
