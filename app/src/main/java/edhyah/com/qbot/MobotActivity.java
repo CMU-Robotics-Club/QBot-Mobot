@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.SurfaceView;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
@@ -72,7 +73,8 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
 
     @Override
     protected IOIOLooper createIOIOLooper() {
-        return new MobotLooper(this);
+        Toast.makeText(this, TAG + "Started Looper", Toast.LENGTH_LONG).show();
+        return new MobotLooper(this, this);
     }
 
     public void onCameraViewStarted(int width, int height) {

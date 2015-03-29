@@ -1,5 +1,9 @@
 package edhyah.com.qbot;
 
+import android.content.Context;
+import android.util.Log;
+import android.widget.Toast;
+
 import ioio.lib.api.DigitalOutput;
 import ioio.lib.api.IOIO;
 import ioio.lib.api.PwmOutput;
@@ -11,10 +15,12 @@ import ioio.lib.util.BaseIOIOLooper;
  */
 // TODO use update instead of pull
 class MobotLooper extends BaseIOIOLooper {
+    private static final String TAG = "MobotLooper";
+
     private final static int RIGHT_MOTOR_PIN = 2;
     private final static int LEFT_MOTOR_PIN = 3;
     private final static int LED_TOGGLE_DELAY = 100;
-    
+
 
     // PWM
     private final int PWM_MIN_VAL_DEFAULT = 1000;
@@ -30,33 +36,48 @@ class MobotLooper extends BaseIOIOLooper {
     public int mPwmDriveRightVal = PWM_OFF_VAL;
     public int mPwmDriveLeftVal = PWM_OFF_VAL;
 
+    private Context mContext;
     private MobotDriver mMobotDriver;
     private PwmOutput mRightMotor;
     private PwmOutput mLeftMotor;
     private DigitalOutput mStatusLed;
     private int mLedToggleCounter = LED_TOGGLE_DELAY;
 
-    public MobotLooper(MobotDriver mobotDriver) {
+    public MobotLooper(Context context, MobotDriver mobotDriver) {
+        mContext = context;
         mMobotDriver = mobotDriver;
     }
 
     @Override
-    public void setup() throws ConnectionLostException {
-        mStatusLed = ioio_.openDigitalOutput(IOIO.LED_PIN, true);
-        mRightMotor = ioio_.openPwmOutput(RIGHT_MOTOR_PIN, PWM_FREQUENCY_IN_HZ);
-        mLeftMotor = ioio_.openPwmOutput(LEFT_MOTOR_PIN, PWM_FREQUENCY_IN_HZ);
+    public void setup() {
+        try {
+            mStatusLed = ioio_.openDigitalOutput(IOIO.LED_PIN, true);
+            mRightMotor = ioio_.openPwmOutput(RIGHT_MOTOR_PIN, PWM_FREQUENCY_IN_HZ);
+            mLeftMotor = ioio_.openPwmOutput(LEFT_MOTOR_PIN, PWM_FREQUENCY_IN_HZ);
+        } catch (ConnectionLostException e) {
+            Log.e(TAG, e.getMessage());
+            Toast.makeText(mContext, TAG + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override
-    public void loop() throws ConnectionLostException, InterruptedException {
-        driveMobot();
-        toggleStatusLed();
-        Thread.sleep(10);
+    public void loop() {
+        try {
+            driveMobot();
+            toggleStatusLed();
+        } catch (ConnectionLostException e) {
+            Log.e(TAG, e.getMessage());
+            Toast.makeText(mContext, TAG + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
     }
 
     private void driveMobot() throws ConnectionLostException {
         double angle = mMobotDriver.getDriveAngle();
         double speed = mMobotDriver.getDriveSpeed(); // Percent, negative signifies going backwards
+
+        Log.i(TAG, "Angle " + angle + " Speed" + speed);
+        Toast.makeText(mContext, TAG + "Angle " + angle + " Speed" + speed, Toast.LENGTH_LONG).show();
+
 
         double turnDist = Math.abs(speed) * MAX_SPEED * DELTA_T;
         double turnRadius = turnDist / Math.tan(Math.toRadians(angle/2));
