@@ -25,7 +25,6 @@ public class Sample_algorithm {
         int scale = 2;
         // The hue value of opencv is [0,180)
         double threshold = 90;
-        double angle = 0.0;
 
         int adjHeight = vidHeight / scale;
         int adjWidth = vidWidth / scale;
@@ -50,7 +49,7 @@ public class Sample_algorithm {
 
         ArrayList selectedpoints = new ArrayList<>();
         for (int i = 0; i < amount; i++) {
-            if (vidHue.get(xsub[i], ysub[i])[0] > threshold) {
+            if (vidHue.get(ysub[i],xsub[i])[0] > threshold) {
                 selectedpoints.add(randompoints[i]);
             }
         }
@@ -58,13 +57,13 @@ public class Sample_algorithm {
         int[] sxsub = ind2subx(adjWidth, spoints.length, spoints);
         int[] sysub = ind2suby(adjWidth, spoints.length, spoints);
 
-        FloatMatrix approx1 = linearRegression(sxsub, sysub, false);
-        FloatMatrix approx2 = quadRegression(sxsub, sysub, false);
-        double std1 = stdofcol(res1);
-        double std2 = stdofcol(res2);
+        FloatMatrix err1 = linearRegression(sxsub, sysub, false);
+        FloatMatrix err2 = quadRegression(sxsub, sysub, false);
+        double std1 = stdofcol(err1,sxsub.length);
+        double std2 = stdofcol(err2,sxsub.length);
 
-        int[] newpoints1 = removeoutliers(spoints, res1.sub(approx1), std1, 2);
-        int[] newpoints2 = removeoutliers(spoints, res2.sub(approx2), std2, 2);
+        int[] newpoints1 = removeoutliers(spoints, err1,std1,sxsub.length, 2);
+        int[] newpoints2 = removeoutliers(spoints, err2,std2,sxsub.length, 2);
 
         int[] nxsub = ind2subx(adjWidth, newpoints1.length, newpoints1);
         int[] nysub = ind2suby(adjWidth, newpoints2.length, newpoints2);
@@ -73,32 +72,10 @@ public class Sample_algorithm {
         FloatMatrix res2 = quadRegression(nxsub, nysub, true);
 
         double angle1 = Math.tan((double) res1.get(1, 0));
-        double angle2 = 0.0 //Remain to be done.
+        double angle2 = calcAngleQuad(res2,adjWidth,adjHeight);
+
         return (angle1 + angle2) / 2;
 
-        /*
-        Mat matxsub = convert1dtomat(sxsub, ssize);
-        Mat tmatxsub = new Mat (ssize,1,CvType.CV_16U);Mat linearmat = convert2dtomat(linear2d,ssize,2);
-        Mat quadmat = convert2dtomat(quad2d,ssize,3);
-        Mat tlinearmat = new Mat(2,ssize,CvType.CV_16U);
-        Mat tquadmat = new Mat(3,ssize,CvType.CV_16U);
-        Core.transpose(tlinearmat,linearmat);
-        Core.transpose(tquadmat,quadmat);
-        //Core.transpose(tmatxsub,matxsub);
-
-        Mat lineartl = new Mat(2,2,CvType.CV_16U);
-        Mat quadtl = new Mat(3,3,CvType.CV_16U);
-        Mat lineartb = new Mat(2,1,CvType.CV_16U);
-        Mat quadtb = new Mat(3,1,CvType.CV_16U);
-
-        Core.gemm(linearmat,tlinearmat,1,new Mat(),0,lineartl,0);
-        Core.gemm(quadmat,tquadmat,1,new Mat(),0,quadtl,0);
-        Core.gemm(matxsub,linearmat,1,new Mat(),0,lineartb,0);
-        Core.gemm(matxsub,quadmat,1,new Mat(),0,quadtb,0);
-
-        Mat invlineartl = new Mat(2,2,CvType.CV_16U);
-        Mat invquadtl = new Mat(3,3,CvType.CV_16U);
-        */
     }
 
     private int[] ind2subx(int width, int length, int[] loc){
@@ -127,7 +104,7 @@ public class Sample_algorithm {
         FloatMatrix para = Solve.solve(res.transpose().mmul(res),
                 res.transpose().mmul(convert1dtocol(xdata,xdata.length)));
         if (fin) return para;
-        return res.mmul(para);
+        return res.sub(res.mmul(para));
     }
 
     private FloatMatrix quadRegression (int[] xdata,int[] ydata, boolean fin){
@@ -141,7 +118,7 @@ public class Sample_algorithm {
         FloatMatrix para = Solve.solve(res.transpose().mmul(res),
                 res.transpose().mmul(convert1dtocol(xdata,xdata.length)));
         if (fin) return para;
-        return res.mmul(para);
+        return res.sub(res.mmul(para));
     }
 
     private int[] arratlistToArray (ArrayList s){
@@ -152,17 +129,32 @@ public class Sample_algorithm {
         }
         return spoints;
     }
-    /*private Mat convert2dtomat(int[][] m, int height, int width) {
-        Mat temp = new Mat(height, width, CvType.CV_16U);
-        for (int i = 0; i < height; i++) {
-            for (int j = 0; j < width; j++) {
-                int[] tmp = new int[]{m[i][j]};
-                temp.put(i, j, tmp);
-            }
 
+
+    private double stdofcol(FloatMatrix col, int length){
+        float total = 0;
+        for (int i = 0; i < length; i++){
+            total += col.get(i,0);
         }
-        return temp;
-    } */
+        double mean = total / length;
+        double t = 0;
+        for (int i = 0; i < length; i++){
+            double err = Math.pow(col.get(i,0) - mean,2.0);
+            t += err;
+        }
+        return Math.sqrt(t / (length - 1));
+    }
+
+    private int[] removeoutliers(int[] data, FloatMatrix err,
+                                 double std, int size, int k){
+       ArrayList res = new ArrayList<>();
+       for (int i = 0; i < size; i++){
+           if (err.get(i,0) <= k * std){
+               res.add(data[i]);
+           }
+       }
+       return arratlistToArray(res);
+    }
 
     private FloatMatrix convert1dtocol(int[] m,int width){
         FloatMatrix temp = new FloatMatrix(width,1);
@@ -172,4 +164,13 @@ public class Sample_algorithm {
         return temp;
     }
 
+    private double calcAngleQuad(FloatMatrix res, int width,int height){
+        float c = res.get(0,0);
+        float b = res.get(1,0);
+        float a = res.get(2,0);
+        float yd = height/2;
+        float xd = a*yd*yd + b*yd + c;
+        float k = (xd - width/2) / yd;
+        return Math.tan((double) k);
+    }
 }
