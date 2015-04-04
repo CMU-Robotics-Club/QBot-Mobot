@@ -16,8 +16,8 @@ import ioio.lib.util.BaseIOIOLooper;
 class MobotLooper extends BaseIOIOLooper {
     private static final String TAG = "MobotIOIOLooper";
 
-    private final static int RIGHT_MOTOR_PIN = 2;
-    private final static int LEFT_MOTOR_PIN = 3;
+    private final static int RIGHT_MOTOR_PIN = 3;
+    private final static int LEFT_MOTOR_PIN = 2;
     private final static int LED_TOGGLE_DELAY = 10;
 
     // PWM
@@ -27,6 +27,7 @@ class MobotLooper extends BaseIOIOLooper {
     private final int PWM_FREQUENCY_IN_HZ = 50;
     
     // DRIVING
+    private static final double DRIVE_STRAIGHT_ANGLE = .05; //deg
     private static final double MAX_SPEED = 1; // inchec/sec
     private static final double DELTA_T = .01; // sec TODO pass in as variable
     private static final double MOBOT_DRIVETRAIN_WIDTH = 5.5; // inches
@@ -48,7 +49,6 @@ class MobotLooper extends BaseIOIOLooper {
 
     @Override
     public void setup() {
-        Log.i(TAG, "Setup");
         try {
             mStatusLed = ioio_.openDigitalOutput(IOIO.LED_PIN, true);
             mRightMotor = ioio_.openPwmOutput(RIGHT_MOTOR_PIN, PWM_FREQUENCY_IN_HZ);
@@ -60,11 +60,12 @@ class MobotLooper extends BaseIOIOLooper {
 
     @Override
     public void loop() {
-        Log.i(TAG, "Loop");
         try {
             driveMobot();
             toggleStatusLed();
         } catch (ConnectionLostException e) {
+            Log.e(TAG, e.getMessage());
+        } catch (IllegalArgumentException e) {
             Log.e(TAG, e.getMessage());
         }
     }
@@ -73,15 +74,19 @@ class MobotLooper extends BaseIOIOLooper {
         double angle = mMobotDriver.getDriveAngle();
         double speed = mMobotDriver.getDriveSpeed(); // Percent, negative signifies going backwards
 
-        Log.i(TAG, "Angle " + angle + " Speed" + speed);
+        Log.i(TAG, "Angle " + angle + " Speed " + speed);
 
         double turnDist = Math.abs(speed) * MAX_SPEED * DELTA_T;
-        double turnRadius = turnDist / Math.tan(Math.toRadians(angle/2));
-        double speedRatio = (turnRadius - MOBOT_DRIVETRAIN_WIDTH) / 
-                (turnRadius + MOBOT_DRIVETRAIN_WIDTH); // Percentage
+        double speedRatio = 1;
+        if (Math.abs(angle) > DRIVE_STRAIGHT_ANGLE) {
+            // Only calculate if turning angle is significant enough
+            double turnRadius = turnDist / Math.tan(Math.toRadians(angle / 2));
+            speedRatio = (turnRadius - MOBOT_DRIVETRAIN_WIDTH) /
+                    (turnRadius + MOBOT_DRIVETRAIN_WIDTH); // Percentage
+        }
 
-        mPwmDriveRightVal = speedToPwm(speed);
-        mPwmDriveLeftVal = speedToPwm(speed*speedRatio);                
+        mPwmDriveRightVal = speedToPwm(speed); // Reversed motor
+        mPwmDriveLeftVal = speedToPwm(-speed*speedRatio);
 
         mRightMotor.setPulseWidth(mPwmDriveRightVal);
         mLeftMotor.setPulseWidth(mPwmDriveLeftVal);
