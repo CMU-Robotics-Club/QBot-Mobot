@@ -58,7 +58,6 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         super.onCreate(savedInstanceState);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_mobot);
-        angle_output = (TextView) findViewById(R.id.angle_test);
         mOpenCvCameraView = (PortraitCameraView) findViewById(R.id.video_surface);
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
         mOpenCvCameraView.setCvCameraViewListener(this);
@@ -104,7 +103,7 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         Point p1 = new Point(height,width/2);
         Point p2 = new Point(height / 2, Math.atan(angle) * (height / 2));
         int red = Color.RED;
-        Core.arrowedLine(img,p1,p2,new Scalar(Color.red(red),Color.blue(red),Color.green(red)));
+        Core.line(img,p1,p2,new Scalar(Color.red(red),Color.blue(red),Color.green(red)));
         // TODO update driving directions
         return inputFrame.rgba();
     }
