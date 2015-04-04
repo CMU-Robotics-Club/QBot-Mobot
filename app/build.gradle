@@ -25,4 +25,5 @@ dependencies {
     compile project(':libraries:opencv')
     compile project(':ioioLibAndroid')
     compile project(':ioioLibAndroidDevice')
+    compile project(':ioioLibBT')
 }

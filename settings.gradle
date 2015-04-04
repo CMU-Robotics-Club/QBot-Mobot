@@ -1,3 +1,4 @@
 include ':app', 'ioioLibAndroid'
 include ':libraries:opencv'
 include ':ioioLibAndroidDevice'
+include ':ioioLibBT'

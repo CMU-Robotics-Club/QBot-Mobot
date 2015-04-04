@@ -73,7 +73,7 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
 
     @Override
     protected IOIOLooper createIOIOLooper() {
-        Toast.makeText(this, TAG + "Started Looper", Toast.LENGTH_LONG).show();
+        Log.i(TAG, "Created Looper");
         return new MobotLooper(this, this);
     }
 

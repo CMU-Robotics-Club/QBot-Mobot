@@ -2,7 +2,6 @@ package edhyah.com.qbot;
 
 import android.content.Context;
 import android.util.Log;
-import android.widget.Toast;
 
 import ioio.lib.api.DigitalOutput;
 import ioio.lib.api.IOIO;
@@ -15,12 +14,11 @@ import ioio.lib.util.BaseIOIOLooper;
  */
 // TODO use update instead of pull
 class MobotLooper extends BaseIOIOLooper {
-    private static final String TAG = "MobotLooper";
+    private static final String TAG = "MobotIOIOLooper";
 
     private final static int RIGHT_MOTOR_PIN = 2;
     private final static int LEFT_MOTOR_PIN = 3;
-    private final static int LED_TOGGLE_DELAY = 100;
-
+    private final static int LED_TOGGLE_DELAY = 10;
 
     // PWM
     private final int PWM_MIN_VAL_DEFAULT = 1000;
@@ -50,24 +48,24 @@ class MobotLooper extends BaseIOIOLooper {
 
     @Override
     public void setup() {
+        Log.i(TAG, "Setup");
         try {
             mStatusLed = ioio_.openDigitalOutput(IOIO.LED_PIN, true);
             mRightMotor = ioio_.openPwmOutput(RIGHT_MOTOR_PIN, PWM_FREQUENCY_IN_HZ);
             mLeftMotor = ioio_.openPwmOutput(LEFT_MOTOR_PIN, PWM_FREQUENCY_IN_HZ);
         } catch (ConnectionLostException e) {
             Log.e(TAG, e.getMessage());
-            Toast.makeText(mContext, TAG + e.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
 
     @Override
     public void loop() {
+        Log.i(TAG, "Loop");
         try {
             driveMobot();
             toggleStatusLed();
         } catch (ConnectionLostException e) {
             Log.e(TAG, e.getMessage());
-            Toast.makeText(mContext, TAG + e.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -76,8 +74,6 @@ class MobotLooper extends BaseIOIOLooper {
         double speed = mMobotDriver.getDriveSpeed(); // Percent, negative signifies going backwards
 
         Log.i(TAG, "Angle " + angle + " Speed" + speed);
-        Toast.makeText(mContext, TAG + "Angle " + angle + " Speed" + speed, Toast.LENGTH_LONG).show();
-
 
         double turnDist = Math.abs(speed) * MAX_SPEED * DELTA_T;
         double turnRadius = turnDist / Math.tan(Math.toRadians(angle/2));
