@@ -19,6 +19,8 @@ import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 
+import java.util.List;
+
 import hanqis.com.qbot.Sample_algorithm;
 import ioio.lib.util.IOIOLooper;
 import ioio.lib.util.android.IOIOActivity;
@@ -30,6 +32,7 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
     private static final int LINE_THICKNESS = 5;
     private static final String PREF_KEY_TUNNING = "edhyah.com.qbot.MobotActivity.PREF_KEY_TUNNING";
     private static final float DEFAULT_TUNNING = 0;
+    private static final int POINT_THICKNESS = 2;
     private PortraitCameraView mOpenCvCameraView; // TODO add a turn off button for when not debugging
     private boolean mStatusConnected;
 
@@ -37,6 +40,10 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
     private double mAngle = 0;
     private double mTunning = 0;
     private double mSpeed = 0;
+    
+    /* need to be in [0,180) */
+    private double mThreshold = 20;
+    private int mSamplingPoints = 2000;
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -110,10 +117,10 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         Mat img = inputFrame.rgba();
-        //mAngle = mAlgorithm.Sampling(img);
+        mAngle = mAlgorithm.Sampling(img,mThreshold,mSamplingPoints);
         updateAngle(mAngle);
 
-        // Draw debug pt
+        addSelectedPoints(img);
         addFoundLine(img, mAngle);
         return img;
     }
@@ -126,6 +133,15 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
                 height*(1 - Math.cos(Math.toRadians(mAngle))));
         int red = Color.RED;
         Core.line(img, p1, p2, new Scalar(Color.red(red), Color.blue(red), Color.green(red)), LINE_THICKNESS);
+    }
+
+    private void addSelectedPoints(Mat img){
+        List<Point> pts = mAlgorithm.getSelectedPoints();
+        int blue = Color.BLUE;
+        Scalar sBlue = new Scalar(Color.red(blue),Color.blue(blue),Color.green(blue));
+        for (int i = 0;i < pts.size();i++){
+            Core.circle(img,pts.get(i),2,sBlue,POINT_THICKNESS);
+        }
     }
 
     //------------ Tuning Mobot -------------------------------------------
@@ -207,7 +223,7 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
     }
 
     private double updateSpeed(int val, int maxVal) {
-        final double speed = 1.0*val / maxVal;
+        final double speed = 1.0 * val / maxVal;
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -225,6 +241,11 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         return mAngle;
     }
 
+    /*(This code contains error) */
+    /* private void updateAngle(String s){
+        TextView angle = (TextView) findViewById(R.id.angle_test);
+        angle.setText(s);
+    }*/
     @Override
     public double getDriveSpeed() {
         return mSpeed;
