@@ -107,13 +107,14 @@ public class Sample_algorithm {
         Mat B = new Mat(2,1,CvType.CV_32FC1);
         Mat X = convert1dtocol(xdata,xdata.length);
         Core.gemm(res.t(),X,1,Mat.zeros(2,1,CvType.CV_32FC1),0,B,0);
+        Core.gemm(res.t(),res,1,Mat.zeros(2,2,CvType.CV_32FC1),0,temp,0);
         Mat para = new Mat(2,1,CvType.CV_32FC1);
         /*Core.solve.solve(temp,B); */
         Core.solve(temp,B,para);
         if (fin) return para;
         Mat X1 = new Mat(xdata.length,1,CvType.CV_32FC1);
         Core.gemm(res,para,1,Mat.zeros(ydata.length,1,CvType.CV_32FC1),0,X1,0);
-        Mat err = new Mat(xdata.length,1,CvType.CV_32FC1);
+        Mat err = Mat.zeros(xdata.length,1,CvType.CV_32FC1);
         Core.subtract(X,X1,err);
         return err;
         /* return res.sub(res.mmul(para)); */
@@ -131,13 +132,14 @@ public class Sample_algorithm {
         Mat B = new Mat(3,1,CvType.CV_32FC1);
         Mat X = convert1dtocol(xdata,xdata.length);
         Core.gemm(res.t(),X,1,Mat.zeros(3,1,CvType.CV_32FC1),0,B,0);
+        Core.gemm(res.t(),res,1,Mat.zeros(3,3,CvType.CV_32FC1),0,temp,0);
         Mat para = new Mat(3,1,CvType.CV_32FC1);
         /*Core.solve.solve(temp,B); */
         Core.solve(temp,B,para);
         if (fin) return para;
         Mat X1 = new Mat(xdata.length,1,CvType.CV_32FC1);
-        Core.gemm(res,para,1,Mat.zeros(3,1,CvType.CV_32FC1),0,X1,0);
-        Mat err = new Mat(xdata.length,1,CvType.CV_32FC1);
+        Core.gemm(res,para,1,Mat.zeros(ydata.length,1,CvType.CV_32FC1),0,X1,0);
+        Mat err = Mat.zeros(xdata.length,1,CvType.CV_32FC1);
         Core.subtract(X,X1,err);
         return err;
     }
@@ -181,7 +183,7 @@ public class Sample_algorithm {
     private Mat convert1dtocol(int[] m,int width){
         Mat temp = new Mat(width,1,CvType.CV_32FC1);
         for (int i = 0; i < width; i++) {
-            temp.put(0,i,new float[]{m[i]});
+            temp.put(i,0,new float[]{m[i]});
         }
         return temp;
     }

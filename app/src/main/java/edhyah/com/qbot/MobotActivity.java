@@ -97,7 +97,7 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         int height = img.height();
         int width = img.width();
         angle = algo.Sampling(img);
-        updateAngle(Double.toString(angle));
+        /* updateAngle(Double.toString(angle)); */
 
 
         Point p1 = new Point(height,width/2);
@@ -108,8 +108,9 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         return inputFrame.rgba();
     }
 
-    private void updateAngle(String s){
+    /*(This code contains error) */
+    /* private void updateAngle(String s){
         TextView angle = (TextView) findViewById(R.id.angle_test);
         angle.setText(s);
-    }
+    }*/
 }
