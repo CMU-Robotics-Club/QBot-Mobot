@@ -1,14 +1,24 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:opencv="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical">
 
     <TextView
-        android:layout_width ="wrap_content"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/mobot_messages"
+        android:textColor="#ff2016ff"
+        android:textSize="20sp"
+        android:text="@string/default_msg"/>
+
+    <TextView
+        android:layout_width ="fill_parent"
         android:layout_height ="wrap_content"
         android:id="@+id/angle_test"
         android:textColor="#ff2016ff"
-        android:textSize="20sp" />
+        android:textSize="20sp"
+        android:text="@string/default_msg"/>
 
     <edhyah.com.qbot.PortraitCameraView
         android:layout_width="fill_parent"

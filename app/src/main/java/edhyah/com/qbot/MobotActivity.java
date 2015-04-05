@@ -20,13 +20,15 @@ import hanqis.com.qbot.Sample_algorithm;
 import ioio.lib.util.IOIOLooper;
 import ioio.lib.util.android.IOIOActivity;
 
-public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.CvCameraViewListener2 {
+public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.CvCameraViewListener2,
+        MobotLooper.MobotDriver {
 
     private static final String TAG = "MobotActivity";
+    private static final int LINE_THICKNESS = 5;
     private PortraitCameraView mOpenCvCameraView; // TODO add a turn off button for when not debugging
 
-    private Sample_algorithm algo = new Sample_algorithm();
-    private double angle;
+    private Sample_algorithm mAlgorithm = new Sample_algorithm();
+    private double mAngle = 0;
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -80,7 +82,8 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
 
     @Override
     protected IOIOLooper createIOIOLooper() {
-        return null; // TODO create custom looper object that takes theta input and drives the mobot, also stops, calibrates
+        Log.i(TAG, "Created Looper");
+        return new MobotLooper(this, this);
     }
 
     public void onCameraViewStarted(int width, int height) {
@@ -94,23 +97,67 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         Mat img = inputFrame.rgba();
-        int height = img.height();
-        int width = img.width();
-        angle = algo.Sampling(img);
-        /* updateAngle(Double.toString(angle)); */
+        //mAngle = mAlgorithm.Sampling(img);
+        updateAngle(mAngle);
+        updateMsg("Online");
 
-
-        Point p1 = new Point(height,width/2);
-        Point p2 = new Point(height / 2, Math.atan(angle) * (height / 2));
-        int red = Color.RED;
-        Core.line(img,p1,p2,new Scalar(Color.red(red),Color.blue(red),Color.green(red)));
-        // TODO update driving directions
-        return inputFrame.rgba();
+        // Draw debug pt
+        addFoundLine(img, mAngle);
+        return img;
     }
 
+    private void addFoundLine(Mat img, double mAngle) {
+        int height = img.height();
+        int width = img.width();
+<<<<<<< HEAD
+        angle = algo.Sampling(img);
+        /* updateAngle(Double.toString(angle)); */
+=======
+        Point p1 = new Point(width/2,height);
+        Point p2 = new Point(width/2 + height*Math.sin(Math.toRadians(mAngle)),
+                height*(1 - Math.cos(Math.toRadians(mAngle))));
+        int red = Color.RED;
+        Core.line(img, p1, p2, new Scalar(Color.red(red), Color.blue(red), Color.green(red)), LINE_THICKNESS);
+    }
+>>>>>>> origin/master
+
+    //------------ Driving Mobot -------------------------------------------
+
+    @Override
+    public double getDriveAngle() {
+        return mAngle;
+    }
+
+<<<<<<< HEAD
     /*(This code contains error) */
     /* private void updateAngle(String s){
         TextView angle = (TextView) findViewById(R.id.angle_test);
         angle.setText(s);
     }*/
+=======
+    @Override
+    public double getDriveSpeed() {
+        return 1.0;
+    }
+
+    private void updateAngle(final Double a){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                TextView angle = (TextView) findViewById(R.id.angle_test);
+                angle.setText(getString(R.string.angle_front) + a);
+            }
+        });
+    }
+
+    private void updateMsg(final String m) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                TextView msg = (TextView) findViewById(R.id.mobot_messages);
+                msg.setText(m);
+            }
+        });
+    }
+>>>>>>> origin/master
 }
