@@ -16,6 +16,8 @@ import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 
+import java.util.List;
+
 import hanqis.com.qbot.Sample_algorithm;
 import ioio.lib.util.IOIOLooper;
 import ioio.lib.util.android.IOIOActivity;
@@ -25,12 +27,13 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
 
     private static final String TAG = "MobotActivity";
     private static final int LINE_THICKNESS = 5;
+    private static final int POINT_THICKNESS = 2;
     private PortraitCameraView mOpenCvCameraView; // TODO add a turn off button for when not debugging
 
     private Sample_algorithm mAlgorithm = new Sample_algorithm();
     private double mAngle = 0;
     /* need to be in [0,180) */
-    private double mThreshold = 0;
+    private double mThreshold = 20;
     private int mSamplingPoints = 2000;
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
@@ -100,11 +103,11 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         Mat img = inputFrame.rgba();
-        //mAngle = mAlgorithm.Sampling(img);
+        mAngle = mAlgorithm.Sampling(img,mThreshold,mSamplingPoints);
         updateAngle(mAngle);
         updateMsg("Online");
 
-        // Draw debug pt
+        addSelectedPoints(img);
         addFoundLine(img, mAngle);
         return img;
     }
@@ -112,13 +115,20 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
     private void addFoundLine(Mat img, double mAngle) {
         int height = img.height();
         int width = img.width();
-        mAngle = mAlgorithm.Sampling(img,mThreshold,mSamplingPoints);
-        updateAngle(mAngle);
         Point p1 = new Point(width/2,height);
         Point p2 = new Point(width/2 + height*Math.sin(Math.toRadians(mAngle)),
                 height*(1 - Math.cos(Math.toRadians(mAngle))));
         int red = Color.RED;
         Core.line(img, p1, p2, new Scalar(Color.red(red), Color.blue(red), Color.green(red)), LINE_THICKNESS);
+    }
+
+    private void addSelectedPoints(Mat img){
+        List<Point> pts = mAlgorithm.getSelectedPoints();
+        int blue = Color.BLUE;
+        Scalar sBlue = new Scalar(Color.red(blue),Color.blue(blue),Color.green(blue));
+        for (int i = 0;i < pts.size();i++){
+            Core.circle(img,pts.get(i),2,sBlue,POINT_THICKNESS);
+        }
     }
 
     //------------ Driving Mobot -------------------------------------------

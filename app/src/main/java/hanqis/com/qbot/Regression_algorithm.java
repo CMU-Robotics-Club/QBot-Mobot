@@ -14,6 +14,13 @@ public class Regression_algorithm {
         dimension = n + 1;
     }
 
+
+    /* xdata is the dependent variable, ydata is the independent variable. Sounds weird,
+       but that what actually happens for our program.
+       n is the dimension you want to use, linearRegression just pass 1, quad pass 2, and so on.
+       fin determines the result you want. True will just return the coeffcient of the final
+       polynomial; false will return the difference between estimated data and real data.
+     */
     public Mat Regression(int[] xdata,int[] ydata, int n, boolean fin){
         setDimension(n);
         Mat res = new Mat(ydata.length,dimension, CvType.CV_32FC1);
@@ -23,13 +30,11 @@ public class Regression_algorithm {
             }
         }
         Mat resTres = new Mat(dimension,dimension,CvType.CV_32FC1);
-        /* Mat B = t.mmul(convert1dtocol(xdata,xdata.length)); */
         Mat B = new Mat(dimension,1,CvType.CV_32FC1);
         Mat X = convert1dtocol(xdata,xdata.length);
         Core.gemm(res.t(), X, 1, Mat.zeros(dimension, 1, CvType.CV_32FC1), 0, B, 0);
         Core.gemm(res.t(),res,1,Mat.zeros(dimension,dimension,CvType.CV_32FC1),0,resTres,0);
         Mat para = new Mat(dimension,1,CvType.CV_32FC1);
-        /*Core.solve.solve(temp,B); */
         Core.solve(resTres,B,para);
         if (fin) return para;
         Mat X1 = new Mat(xdata.length,1,CvType.CV_32FC1);

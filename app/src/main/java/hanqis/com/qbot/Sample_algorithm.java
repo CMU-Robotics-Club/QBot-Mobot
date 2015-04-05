@@ -3,6 +3,7 @@ package hanqis.com.qbot;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.Point;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
@@ -18,18 +19,14 @@ public class Sample_algorithm {
 
     private static int amount;
     private Regression_algorithm mRegress = new Regression_algorithm();
+    private List<Point> selectedPoints = new ArrayList<Point>();
+    private static int scale = 2;
 
-    private void setAmount(int sample){
-        amount = sample;
-    }
 
     public double Sampling(Mat vidRgb,double threshold,int sample) {
         int vidHeight = vidRgb.height();
         int vidWidth = vidRgb.width();
-
         setAmount(sample);
-
-        int scale = 2;
 
         int adjHeight = vidHeight / scale;
         int adjWidth = vidWidth / scale;
@@ -52,18 +49,18 @@ public class Sample_algorithm {
         int[] xsub = ind2subx(adjWidth, amount, randompoints);
         int[] ysub = ind2suby(adjWidth, amount, randompoints);
 
-        ArrayList selectedpoints = new ArrayList<Integer>();
+        ArrayList selectedpts = new ArrayList<Integer>();
         for (int i = 0; i < amount; i++) {
             if (vidHue.get(ysub[i],xsub[i])[0] > threshold) {
-                selectedpoints.add(randompoints[i]);
+                selectedpts.add(randompoints[i]);
             }
         }
-        int[] spoints = convertIntegers(selectedpoints);
+        int[] spoints = convertIntegers(selectedpts);
         int[] sxsub = ind2subx(adjWidth, spoints.length, spoints);
         int[] sysub = ind2suby(adjWidth, spoints.length, spoints);
 
         Mat err1 = mRegress.Regression(sxsub, sysub,1,false);
-        Mat err2 = mRegress.Regression(sxsub, sysub,2,false);
+        Mat err2 = mRegress.Regression(sxsub, sysub, 2, false);
         double std1 = stdofcol(err1,sxsub.length);
         double std2 = stdofcol(err2,sxsub.length);
 
@@ -75,13 +72,15 @@ public class Sample_algorithm {
         int[] nxsub2 = ind2subx(adjWidth, newpoints2.length, newpoints2);
         int[] nysub2 = ind2suby(adjWidth, newpoints2.length, newpoints2);
 
+        setSelectedPoints(nxsub1,nysub1);
+
         Mat res1 = mRegress.Regression(nxsub1,nysub1,1,true);
-        Mat res2 = mRegress.Regression(nxsub2,nysub2,2,true);
+        Mat res2 = mRegress.Regression(nxsub2, nysub2, 2, true);
 
         double angle1 = Math.tan(res1.get(1, 0)[0]);
         double angle2 = calcAngleQuad(res2,adjWidth,adjHeight);
 
-        return (angle1 + angle2) / 2;
+        return angle1;
 
     }
 
@@ -100,50 +99,6 @@ public class Sample_algorithm {
         }
         return res;
     }
-
-    /* private Mat linearRegression (int[] xdata,int[] ydata,boolean fin){
-        Mat res = new Mat(ydata.length,2,CvType.CV_32FC1);
-        for (int i = 0; i < ydata.length; i++){
-            res.put(i,1,new float[]{ydata[i]});
-            res.put(i,0,new float[]{1});
-        }
-        Mat temp = new Mat(2,2,CvType.CV_32FC1);
-        Mat B = new Mat(2,1,CvType.CV_32FC1);
-        Mat X = convert1dtocol(xdata,xdata.length);
-        Core.gemm(res.t(),X,1,Mat.zeros(2,1,CvType.CV_32FC1),0,B,0);
-        Core.gemm(res.t(),res,1,Mat.zeros(2,2,CvType.CV_32FC1),0,temp,0);
-        Mat para = new Mat(2,1,CvType.CV_32FC1);
-        Core.solve(temp,B,para);
-        if (fin) return para;
-        Mat X1 = new Mat(xdata.length,1,CvType.CV_32FC1);
-        Core.gemm(res,para,1,Mat.zeros(ydata.length,1,CvType.CV_32FC1),0,X1,0);
-        Mat err = Mat.zeros(xdata.length,1,CvType.CV_32FC1);
-        Core.subtract(X,X1,err);
-        return err;
-    } */
-
-    /*private Mat quadRegression (int[] xdata,int[] ydata, boolean fin){
-        Mat res = new Mat(ydata.length,3, CvType.CV_32FC1);
-        for (int i = 0; i < ydata.length; i++){
-            res.put(i,0,new float[]{1});
-            res.put(i,1,new float[]{ydata[i]});
-            res.put(i,2,new float[]{(ydata[i] * ydata[i])});
-        }
-        Mat temp = new Mat(3,3,CvType.CV_32FC1);
-        Mat B = new Mat(3,1,CvType.CV_32FC1);
-        Mat X = convert1dtocol(xdata,xdata.length);
-        Core.gemm(res.t(),X,1,Mat.zeros(3,1,CvType.CV_32FC1),0,B,0);
-        Core.gemm(res.t(),res,1,Mat.zeros(3,3,CvType.CV_32FC1),0,temp,0);
-        Mat para = new Mat(3,1,CvType.CV_32FC1);
-        Core.solve(temp,B,para);
-        if (fin) return para;
-        Mat X1 = new Mat(xdata.length,1,CvType.CV_32FC1);
-        Core.gemm(res,para,1,Mat.zeros(ydata.length,1,CvType.CV_32FC1),0,X1,0);
-        Mat err = Mat.zeros(xdata.length,1,CvType.CV_32FC1);
-        Core.subtract(X,X1,err);
-        return err;
-    } */
-
 
     public static int[] convertIntegers(List<Integer> integers)
     {
@@ -190,5 +145,20 @@ public class Sample_algorithm {
         double xd = a*yd*yd + b*yd + c;
         double k = (xd - width/2) / yd;
         return Math.tan(k);
+    }
+
+    public List<Point> getSelectedPoints() {
+        return selectedPoints;
+    }
+
+    public void setSelectedPoints(int[] xsub,int[] ysub){
+        for (int i = 0; i < xsub.length; i++){
+            Point p = new Point(xsub[i] * scale,ysub[i] * scale);
+            selectedPoints.add(p);
+        }
+    }
+
+    private void setAmount(int sample){
+        amount = sample;
     }
 }
