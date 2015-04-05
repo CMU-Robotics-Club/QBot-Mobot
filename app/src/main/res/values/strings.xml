@@ -14,5 +14,7 @@
     <string name="qbot_welcome">QBot Mobot Application</string>
     <string name="btn_mobot">Mobot Activity</string>
     <string name="title_activity_mobot">MobotActivity</string>
+    <string name="default_msg">Online</string>
+    <string name="angle_front">"Angle: "</string>
 
 </resources>

@@ -26,4 +26,5 @@ dependencies {
     compile project(':ioioLibAndroid')
     compile project(':ioioLibAndroidDevice')
     compile project(':ioioLibBT')
+    compile files('libs/jblas-1.2.3.jar')
 }

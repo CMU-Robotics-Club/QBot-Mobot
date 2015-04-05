@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.SurfaceView;
 import android.view.WindowManager;
-import android.widget.Toast;
+import android.widget.TextView;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
@@ -16,6 +16,7 @@ import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 
+import hanqis.com.qbot.Sample_algorithm;
 import ioio.lib.util.IOIOLooper;
 import ioio.lib.util.android.IOIOActivity;
 
@@ -25,6 +26,9 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
     private static final String TAG = "MobotActivity";
     private static final int LINE_THICKNESS = 5;
     private PortraitCameraView mOpenCvCameraView; // TODO add a turn off button for when not debugging
+
+    private Sample_algorithm mAlgorithm = new Sample_algorithm();
+    private double mAngle = 0;
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -92,27 +96,55 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
 
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-        // TODO processing algorithms
-        // TODO update driving directions
         Mat img = inputFrame.rgba();
+        //mAngle = mAlgorithm.Sampling(img);
+        updateAngle(mAngle);
+        updateMsg("Online");
+
+        // Draw debug pt
+        addFoundLine(img, mAngle);
+        return img;
+    }
+
+    private void addFoundLine(Mat img, double mAngle) {
         int height = img.height();
         int width = img.width();
-        Point p1 = new Point(height,width/2);
-        Point p2 = new Point(height / 2, Math.atan(getDriveAngle()) * (height / 2));
+        Point p1 = new Point(width/2,height);
+        Point p2 = new Point(width/2 + height*Math.sin(Math.toRadians(mAngle)),
+                height*(1 - Math.cos(Math.toRadians(mAngle))));
         int red = Color.RED;
         Core.line(img, p1, p2, new Scalar(Color.red(red), Color.blue(red), Color.green(red)), LINE_THICKNESS);
-        return img;
     }
 
     //------------ Driving Mobot -------------------------------------------
 
     @Override
     public double getDriveAngle() {
-        return 45.0;
+        return mAngle;
     }
 
     @Override
     public double getDriveSpeed() {
         return 1.0;
+    }
+
+    private void updateAngle(final Double a){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                TextView angle = (TextView) findViewById(R.id.angle_test);
+                angle.setText(getString(R.string.angle_front) + a);
+            }
+        });
+    }
+
+    private void updateMsg(final String m) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                TextView msg = (TextView) findViewById(R.id.mobot_messages);
+                msg.setText(m);
+            }
+        });
     }
 }
