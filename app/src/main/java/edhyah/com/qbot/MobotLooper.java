@@ -63,19 +63,21 @@ class MobotLooper extends BaseIOIOLooper {
         try {
             driveMobot();
             toggleStatusLed();
+            mMobotDriver.setStatusOnline(true);
         } catch (ConnectionLostException e) {
             Log.e(TAG, e.getMessage());
-        } catch (IllegalArgumentException e) {
-            Log.e(TAG, e.getMessage());
+            mMobotDriver.setStatusOnline(false);
         }
     }
 
     private void driveMobot() throws ConnectionLostException {
         double angle = mMobotDriver.getDriveAngle();
         double speed = mMobotDriver.getDriveSpeed(); // Percent, negative signifies going backwards
+        double tunning = mMobotDriver.getTunning();
 
         Log.i(TAG, "Angle " + angle + " Speed " + speed);
 
+        // Calc SpeedRatio
         double turnDist = Math.abs(speed) * MAX_SPEED * DELTA_T;
         double speedRatio = 1;
         if (Math.abs(angle) > DRIVE_STRAIGHT_ANGLE) {
@@ -85,8 +87,24 @@ class MobotLooper extends BaseIOIOLooper {
                     (turnRadius + MOBOT_DRIVETRAIN_WIDTH); // Percentage
         }
 
-        mPwmDriveRightVal = speedToPwm(speed); // Reversed motor
-        mPwmDriveLeftVal = speedToPwm(-speed*speedRatio);
+        // Update right and left speeds with tunning and speed turning ratio
+        double rightSpeed = speed;
+        double leftSpeed = speed;
+        if (angle < 0) {
+            leftSpeed *= speedRatio;
+        } else {
+            rightSpeed *= speedRatio;
+        }
+
+        // Tunning reduces speed of opposite motor
+        if (tunning < 0) {
+            rightSpeed *= 1 + tunning;
+        } else {
+            leftSpeed *= 1 - tunning;
+        }
+
+        mPwmDriveRightVal = speedToPwm(-rightSpeed); // Reversed motor
+        mPwmDriveLeftVal = speedToPwm(leftSpeed);
 
         mRightMotor.setPulseWidth(mPwmDriveRightVal);
         mLeftMotor.setPulseWidth(mPwmDriveLeftVal);
@@ -113,6 +131,8 @@ class MobotLooper extends BaseIOIOLooper {
     public interface MobotDriver {
         public double getDriveAngle();
         public double getDriveSpeed();
+        public double getTunning();
+        public void setStatusOnline(boolean status);
     }
 
 }

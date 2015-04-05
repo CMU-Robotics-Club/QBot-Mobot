@@ -10,7 +10,7 @@
         android:id="@+id/mobot_messages"
         android:textColor="#ff2016ff"
         android:textSize="20sp"
-        android:text="@string/default_msg"/>
+        android:text="@string/not_connected_msg"/>
 
     <TextView
         android:layout_width ="fill_parent"
@@ -18,7 +18,61 @@
         android:id="@+id/angle_test"
         android:textColor="#ff2016ff"
         android:textSize="20sp"
-        android:text="@string/default_msg"/>
+        android:text="@string/not_connected_msg"/>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        style="@style/Widget.AppCompat.ProgressBar">
+        <SeekBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/tuningParams"
+            android:max="100"
+            android:progress="50"
+            style="@android:style/Widget.Holo.SeekBar"
+            android:layout_weight="5"
+            android:layout_margin="2dp"/>
+
+        <TextView
+            android:id="@+id/tunning_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#ff2016ff"
+            android:textSize="20sp"
+            android:text="@string/default_seek"
+            android:layout_margin="2dp"
+            android:layout_weight="1"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        style="@style/Widget.AppCompat.ProgressBar">
+        <SeekBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/speedbar"
+            android:max="100"
+            android:progress="0"
+            style="@android:style/Widget.Holo.SeekBar"
+            android:layout_weight="5"
+            android:layout_margin="2dp"/>
+
+        <TextView
+            android:id="@+id/speed_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#ff2016ff"
+            android:textSize="20sp"
+            android:text="@string/default_seek"
+            android:layout_margin="2dp"
+            android:layout_weight="1"/>
+
+    </LinearLayout>
 
     <edhyah.com.qbot.PortraitCameraView
         android:layout_width="fill_parent"

@@ -1,10 +1,13 @@
 package edhyah.com.qbot;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.SurfaceView;
 import android.view.WindowManager;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import org.opencv.android.BaseLoaderCallback;
@@ -25,10 +28,15 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
 
     private static final String TAG = "MobotActivity";
     private static final int LINE_THICKNESS = 5;
+    private static final String PREF_KEY_TUNNING = "edhyah.com.qbot.MobotActivity.PREF_KEY_TUNNING";
+    private static final float DEFAULT_TUNNING = 0;
     private PortraitCameraView mOpenCvCameraView; // TODO add a turn off button for when not debugging
+    private boolean mStatusConnected;
 
     private Sample_algorithm mAlgorithm = new Sample_algorithm();
     private double mAngle = 0;
+    private double mTunning = 0;
+    private double mSpeed = 0;
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -60,9 +68,14 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         super.onCreate(savedInstanceState);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_mobot);
+
+        // OpenCV
         mOpenCvCameraView = (PortraitCameraView) findViewById(R.id.video_surface);
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
         mOpenCvCameraView.setCvCameraViewListener(this);
+
+        addTunningBar();
+        addSpeedBar();
     }
 
     @Override
@@ -99,7 +112,6 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         Mat img = inputFrame.rgba();
         //mAngle = mAlgorithm.Sampling(img);
         updateAngle(mAngle);
-        updateMsg("Online");
 
         // Draw debug pt
         addFoundLine(img, mAngle);
@@ -116,6 +128,96 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         Core.line(img, p1, p2, new Scalar(Color.red(red), Color.blue(red), Color.green(red)), LINE_THICKNESS);
     }
 
+    //------------ Tuning Mobot -------------------------------------------
+
+    private void addTunningBar() {
+        SeekBar tunningBar = (SeekBar) findViewById(R.id.tuningParams);
+        tunningBar.setProgress(loadTunning(tunningBar.getMax()));
+        updateTunning(tunningBar.getProgress(), tunningBar.getMax());
+        tunningBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                mTunning = updateTunning(progress, seekBar.getMax());
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                // Store and save value
+                mTunning = calcTunning(seekBar.getProgress(), seekBar.getMax());
+                saveTunning(mTunning);
+            }
+        });
+    }
+
+    private double calcTunning(int value, int maxValue) {
+        return (2.0 * value / maxValue) - 1; // Map to -1:1
+    }
+
+    private void saveTunning(double val) {
+        SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putFloat(PREF_KEY_TUNNING, (float)val);
+        editor.commit();
+    }
+
+    private int loadTunning(int maxVal) {
+        SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+        double tunning = sharedPref.getFloat(PREF_KEY_TUNNING, DEFAULT_TUNNING);
+        return (int)Math.round(((tunning + 1) / 2) * maxVal);
+    }
+
+    private double updateTunning(int val, int maxVal) {
+        final double progress = calcTunning(val, maxVal);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                TextView msg = (TextView) findViewById(R.id.tunning_value);
+                msg.setText(String.format("%.2f", progress));
+            }
+        });
+        return progress;
+    }
+
+    //------------ Speed Bar -----------------------------------------------
+
+    private void addSpeedBar() {
+        SeekBar speedBar = (SeekBar) findViewById(R.id.speedbar);
+        updateTunning(speedBar.getProgress(), speedBar.getMax());
+        speedBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                mSpeed = updateSpeed(seekBar.getProgress(), seekBar.getMax());
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                mSpeed = updateSpeed(seekBar.getProgress(), seekBar.getMax());
+            }
+        });
+    }
+
+    private double updateSpeed(int val, int maxVal) {
+        final double speed = 1.0*val / maxVal;
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                TextView msg = (TextView) findViewById(R.id.speed_value);
+                msg.setText(String.format("%.2f", speed));
+            }
+        });
+        return speed;
+    }
+
     //------------ Driving Mobot -------------------------------------------
 
     @Override
@@ -125,15 +227,30 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
 
     @Override
     public double getDriveSpeed() {
-        return 1.0;
+        return mSpeed;
     }
+
+    @Override
+    public double getTunning() { return mTunning; }
+
+    @Override
+    public void setStatusOnline(boolean status) {
+        mStatusConnected = status;
+        if (status) {
+            updateMsg(getString(R.string.connected_msg));
+        } else {
+            updateMsg(getString(R.string.not_connected_msg));
+        }
+    }
+
+    //------------ Updating View -------------------------------------------
 
     private void updateAngle(final Double a){
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 TextView angle = (TextView) findViewById(R.id.angle_test);
-                angle.setText(getString(R.string.angle_front) + a);
+                angle.setText(String.format(getString(R.string.angle_front) + "%.2f", a));
             }
         });
     }
@@ -147,4 +264,5 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
             }
         });
     }
+
 }
