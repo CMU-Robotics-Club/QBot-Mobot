@@ -29,6 +29,9 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
 
     private Sample_algorithm mAlgorithm = new Sample_algorithm();
     private double mAngle = 0;
+    /* need to be in [0,180) */
+    private double mThreshold = 0;
+    private int mSamplingPoints = 2000;
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -109,17 +112,14 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
     private void addFoundLine(Mat img, double mAngle) {
         int height = img.height();
         int width = img.width();
-<<<<<<< HEAD
-        angle = algo.Sampling(img);
-        /* updateAngle(Double.toString(angle)); */
-=======
+        mAngle = mAlgorithm.Sampling(img,mThreshold,mSamplingPoints);
+        updateAngle(mAngle);
         Point p1 = new Point(width/2,height);
         Point p2 = new Point(width/2 + height*Math.sin(Math.toRadians(mAngle)),
                 height*(1 - Math.cos(Math.toRadians(mAngle))));
         int red = Color.RED;
         Core.line(img, p1, p2, new Scalar(Color.red(red), Color.blue(red), Color.green(red)), LINE_THICKNESS);
     }
->>>>>>> origin/master
 
     //------------ Driving Mobot -------------------------------------------
 
@@ -128,13 +128,11 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         return mAngle;
     }
 
-<<<<<<< HEAD
     /*(This code contains error) */
     /* private void updateAngle(String s){
         TextView angle = (TextView) findViewById(R.id.angle_test);
         angle.setText(s);
     }*/
-=======
     @Override
     public double getDriveSpeed() {
         return 1.0;
@@ -159,5 +157,4 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
             }
         });
     }
->>>>>>> origin/master
 }

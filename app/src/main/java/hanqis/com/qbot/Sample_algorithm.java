@@ -16,15 +16,20 @@ import java.util.Random;
  */
 public class Sample_algorithm {
 
-    private static int amount = 2000;
+    private static int amount;
+    private Regression_algorithm mRegress = new Regression_algorithm();
 
-    public double Sampling(Mat vidRgb) {
+    private void setAmount(int sample){
+        amount = sample;
+    }
+
+    public double Sampling(Mat vidRgb,double threshold,int sample) {
         int vidHeight = vidRgb.height();
         int vidWidth = vidRgb.width();
 
+        setAmount(sample);
+
         int scale = 2;
-        // The hue value of opencv is [0,180)
-        double threshold = 0;
 
         int adjHeight = vidHeight / scale;
         int adjWidth = vidWidth / scale;
@@ -57,8 +62,8 @@ public class Sample_algorithm {
         int[] sxsub = ind2subx(adjWidth, spoints.length, spoints);
         int[] sysub = ind2suby(adjWidth, spoints.length, spoints);
 
-        Mat err1 = linearRegression(sxsub, sysub, false);
-        Mat err2 = quadRegression(sxsub, sysub, false);
+        Mat err1 = mRegress.Regression(sxsub, sysub,1,false);
+        Mat err2 = mRegress.Regression(sxsub, sysub,2,false);
         double std1 = stdofcol(err1,sxsub.length);
         double std2 = stdofcol(err2,sxsub.length);
 
@@ -70,8 +75,8 @@ public class Sample_algorithm {
         int[] nxsub2 = ind2subx(adjWidth, newpoints2.length, newpoints2);
         int[] nysub2 = ind2suby(adjWidth, newpoints2.length, newpoints2);
 
-        Mat res1 = linearRegression(nxsub1, nysub1, true);
-        Mat res2 = quadRegression(nxsub2, nysub2, true);
+        Mat res1 = mRegress.Regression(nxsub1,nysub1,1,true);
+        Mat res2 = mRegress.Regression(nxsub2,nysub2,2,true);
 
         double angle1 = Math.tan(res1.get(1, 0)[0]);
         double angle2 = calcAngleQuad(res2,adjWidth,adjHeight);
@@ -96,20 +101,18 @@ public class Sample_algorithm {
         return res;
     }
 
-    private Mat linearRegression (int[] xdata,int[] ydata,boolean fin){
+    /* private Mat linearRegression (int[] xdata,int[] ydata,boolean fin){
         Mat res = new Mat(ydata.length,2,CvType.CV_32FC1);
         for (int i = 0; i < ydata.length; i++){
             res.put(i,1,new float[]{ydata[i]});
             res.put(i,0,new float[]{1});
         }
         Mat temp = new Mat(2,2,CvType.CV_32FC1);
-        /* Mat B = t.mmul(convert1dtocol(xdata,xdata.length)); */
         Mat B = new Mat(2,1,CvType.CV_32FC1);
         Mat X = convert1dtocol(xdata,xdata.length);
         Core.gemm(res.t(),X,1,Mat.zeros(2,1,CvType.CV_32FC1),0,B,0);
         Core.gemm(res.t(),res,1,Mat.zeros(2,2,CvType.CV_32FC1),0,temp,0);
         Mat para = new Mat(2,1,CvType.CV_32FC1);
-        /*Core.solve.solve(temp,B); */
         Core.solve(temp,B,para);
         if (fin) return para;
         Mat X1 = new Mat(xdata.length,1,CvType.CV_32FC1);
@@ -117,10 +120,9 @@ public class Sample_algorithm {
         Mat err = Mat.zeros(xdata.length,1,CvType.CV_32FC1);
         Core.subtract(X,X1,err);
         return err;
-        /* return res.sub(res.mmul(para)); */
-    }
+    } */
 
-    private Mat quadRegression (int[] xdata,int[] ydata, boolean fin){
+    /*private Mat quadRegression (int[] xdata,int[] ydata, boolean fin){
         Mat res = new Mat(ydata.length,3, CvType.CV_32FC1);
         for (int i = 0; i < ydata.length; i++){
             res.put(i,0,new float[]{1});
@@ -128,13 +130,11 @@ public class Sample_algorithm {
             res.put(i,2,new float[]{(ydata[i] * ydata[i])});
         }
         Mat temp = new Mat(3,3,CvType.CV_32FC1);
-        /* Mat B = t.mmul(convert1dtocol(xdata,xdata.length)); */
         Mat B = new Mat(3,1,CvType.CV_32FC1);
         Mat X = convert1dtocol(xdata,xdata.length);
         Core.gemm(res.t(),X,1,Mat.zeros(3,1,CvType.CV_32FC1),0,B,0);
         Core.gemm(res.t(),res,1,Mat.zeros(3,3,CvType.CV_32FC1),0,temp,0);
         Mat para = new Mat(3,1,CvType.CV_32FC1);
-        /*Core.solve.solve(temp,B); */
         Core.solve(temp,B,para);
         if (fin) return para;
         Mat X1 = new Mat(xdata.length,1,CvType.CV_32FC1);
@@ -142,7 +142,7 @@ public class Sample_algorithm {
         Mat err = Mat.zeros(xdata.length,1,CvType.CV_32FC1);
         Core.subtract(X,X1,err);
         return err;
-    }
+    } */
 
 
     public static int[] convertIntegers(List<Integer> integers)
@@ -180,13 +180,7 @@ public class Sample_algorithm {
        return convertIntegers(res);
     }
 
-    private Mat convert1dtocol(int[] m,int width){
-        Mat temp = new Mat(width,1,CvType.CV_32FC1);
-        for (int i = 0; i < width; i++) {
-            temp.put(i,0,new float[]{m[i]});
-        }
-        return temp;
-    }
+
 
     private double calcAngleQuad(Mat res, int width,int height){
         double c = res.get(0,0)[0];
