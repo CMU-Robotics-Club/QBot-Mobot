@@ -74,6 +74,33 @@
 
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        style="@style/Widget.AppCompat.ProgressBar">
+        <SeekBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/threshold_bar"
+            android:max="180"
+            android:progress="0"
+            style="@android:style/Widget.Holo.SeekBar"
+            android:layout_weight="5"
+            android:layout_margin="2dp"/>
+
+        <TextView
+            android:id="@+id/threshold_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#ff2016ff"
+            android:textSize="20sp"
+            android:text="@string/default_seek"
+            android:layout_margin="2dp"
+            android:layout_weight="1"/>
+
+    </LinearLayout>
+
     <edhyah.com.qbot.PortraitCameraView
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
