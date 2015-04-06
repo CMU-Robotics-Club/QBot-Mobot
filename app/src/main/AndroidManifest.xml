@@ -27,7 +27,8 @@
         </activity>
         <activity
             android:name=".MobotActivity"
-            android:label="@string/title_activity_mobot" >
+            android:label="@string/title_activity_mobot"
+            android:orientation="vertical">
         </activity>
     </application>
 

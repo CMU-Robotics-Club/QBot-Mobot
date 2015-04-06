@@ -27,6 +27,7 @@ public class Sample_algorithm {
         int vidHeight = vidRgb.height();
         int vidWidth = vidRgb.width();
         setAmount(sample);
+        selectedPoints.clear();
 
         int adjHeight = vidHeight / scale;
         int adjWidth = vidWidth / scale;
