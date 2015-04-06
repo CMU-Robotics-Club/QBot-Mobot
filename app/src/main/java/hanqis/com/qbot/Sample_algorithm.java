@@ -27,6 +27,7 @@ public class Sample_algorithm {
         int vidHeight = vidRgb.height();
         int vidWidth = vidRgb.width();
         setAmount(sample);
+        selectedPoints.clear();
 
         int adjHeight = vidHeight / scale;
         int adjWidth = vidWidth / scale;
@@ -55,6 +56,12 @@ public class Sample_algorithm {
                 selectedpts.add(randompoints[i]);
             }
         }
+
+        /* If no points is selected, return value -1.0 */
+        if (selectedpts.size() < 10) {
+            return 0.0;
+        }
+
         int[] spoints = convertIntegers(selectedpts);
         int[] sxsub = ind2subx(adjWidth, spoints.length, spoints);
         int[] sysub = ind2suby(adjWidth, spoints.length, spoints);

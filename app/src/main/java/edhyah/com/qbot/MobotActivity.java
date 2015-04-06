@@ -42,7 +42,7 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
     private double mSpeed = 0;
     
     /* need to be in [0,180) */
-    private double mThreshold = 20;
+    private double mThreshold = 177;
     private int mSamplingPoints = 2000;
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
@@ -83,6 +83,7 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
 
         addTunningBar();
         addSpeedBar();
+        addThresholdBar();
     }
 
     @Override
@@ -222,6 +223,31 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         });
     }
 
+    //------------ Threshold Bar -----------------------------------------------
+
+    private void addThresholdBar() {
+        SeekBar thresholdBar = (SeekBar) findViewById(R.id.threshold_bar);
+        updateThreshold(thresholdBar.getProgress(), thresholdBar.getMax());
+        thresholdBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                updateThreshold(seekBar.getProgress(), seekBar.getMax());
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                updateThreshold(seekBar.getProgress(), seekBar.getMax());
+            }
+        });
+    }
+
+
+
     private double updateSpeed(int val, int maxVal) {
         final double speed = 1.0 * val / maxVal;
         runOnUiThread(new Runnable() {
@@ -232,6 +258,18 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
             }
         });
         return speed;
+    }
+
+    private void updateThreshold(int val, int maxVal) {
+        mThreshold = 1.0 * val;
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                TextView msg = (TextView) findViewById(R.id.threshold_value);
+                msg.setText(String.format("%.2f", mThreshold));
+            }
+        });
+
     }
 
     //------------ Driving Mobot -------------------------------------------
