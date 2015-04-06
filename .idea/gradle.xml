@@ -12,6 +12,7 @@
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/ioioLibAndroid" />
             <option value="$PROJECT_DIR$/ioioLibAndroidDevice" />
+            <option value="$PROJECT_DIR$/ioioLibBT" />
             <option value="$PROJECT_DIR$/libraries" />
             <option value="$PROJECT_DIR$/libraries/opencv" />
           </set>

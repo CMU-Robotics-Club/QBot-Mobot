@@ -14,5 +14,9 @@
     <string name="qbot_welcome">QBot Mobot Application</string>
     <string name="btn_mobot">Mobot Activity</string>
     <string name="title_activity_mobot">MobotActivity</string>
+    <string name="not_connected_msg">Not Connected</string>
+    <string name="connected_msg">Connected and Running</string>
+    <string name="angle_front">"Angle: "</string>
+    <string name="default_seek">0</string>
 
 </resources>

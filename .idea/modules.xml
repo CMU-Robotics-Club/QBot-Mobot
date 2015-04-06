@@ -7,6 +7,8 @@
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/ioioLibAndroid/ioioLibAndroid.iml" filepath="$PROJECT_DIR$/ioioLibAndroid/ioioLibAndroid.iml" />
       <module fileurl="file://$PROJECT_DIR$/ioioLibAndroidDevice/ioioLibAndroidDevice.iml" filepath="$PROJECT_DIR$/ioioLibAndroidDevice/ioioLibAndroidDevice.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ioioLibBT/ioioLibBT.iml" filepath="$PROJECT_DIR$/ioioLibBT/ioioLibBT.iml" />
+      <module fileurl="file://$PROJECT_DIR$/libraries/libraries.iml" filepath="$PROJECT_DIR$/libraries/libraries.iml" />
       <module fileurl="file://$PROJECT_DIR$/libraries/opencv/opencv.iml" filepath="$PROJECT_DIR$/libraries/opencv/opencv.iml" />
     </modules>
   </component>
