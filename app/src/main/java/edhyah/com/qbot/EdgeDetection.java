@@ -6,12 +6,15 @@ import org.opencv.core.*;
 
 import java.util.ArrayList;
 
+import hanqis.com.qbot.Regression_algorithm;
+
 /**
  * Created by edwardahn on 30/3/15.
  */
 public class EdgeDetection {
 
-    int[] slices = {1,50,100};
+    private int[] slices = {1,25,50,75,100};
+    private Regression_algorithm eRegress = new Regression_algorithm();
 
     // changes vid in RGB to gray
     private Mat adjustVid(Mat vidRGB) {
@@ -58,6 +61,7 @@ public class EdgeDetection {
         }
         Mat points = arrayListToMat(maxes);
         Mat line = new Mat(4,1,CvType.CV_32FC1);
+        eRegress.Regression(maxes,slices,1,true);
         Imgproc.fitLine(points,line,Imgproc.CV_DIST_L2,0,0.01,0.01);
         double vx = (line.get(0,0))[0];
         double vy = (line.get(1,0))[0];

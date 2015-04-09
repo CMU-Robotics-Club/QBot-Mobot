@@ -36,8 +36,10 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
     private PortraitCameraView mOpenCvCameraView; // TODO add a turn off button for when not debugging
     private boolean mStatusConnected;
 
+    private EdgeDetection eAlgorithm = new EdgeDetection();
     private Sample_algorithm mAlgorithm = new Sample_algorithm();
     private double mAngle = 0;
+
     private double mTunning = 0;
     private double mSpeed = 0;
     
@@ -117,10 +119,11 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         Mat img = inputFrame.rgba();
-        mAngle = mAlgorithm.Sampling(img,mThreshold,mSamplingPoints);
+        mAngle = eAlgorithm.findAngle(img);
+        // mAngle = mAlgorithm.Sampling(img,mThreshold,mSamplingPoints);
         updateAngle(mAngle);
 
-        addSelectedPoints(img);
+        // addSelectedPoints(img);
         addFoundLine(img, mAngle);
         return img;
     }
