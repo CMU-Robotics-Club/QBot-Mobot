@@ -21,6 +21,7 @@ public class Sample_algorithm {
     private Regression_algorithm mRegress = new Regression_algorithm();
     private List<Point> selectedPoints = new ArrayList<Point>();
     private static int scale = 2;
+    private double mThreshold = 90.0;
 
 
     public double Sampling(Mat vidRgb,double threshold,int sample) {
@@ -40,7 +41,7 @@ public class Sample_algorithm {
         List<Mat> hsv_planes = new ArrayList<Mat>();
         Core.split(vidHsv, hsv_planes);
 
-        Mat vidHue = hsv_planes.get(0);
+        Mat vidValue = hsv_planes.get(2);
         int[] randompoints = new int[amount];
         for (int i = 0; i < amount; i++) {
             Random rn = new Random();
@@ -52,7 +53,7 @@ public class Sample_algorithm {
 
         ArrayList selectedpts = new ArrayList<Integer>();
         for (int i = 0; i < amount; i++) {
-            if (vidHue.get(ysub[i],xsub[i])[0] > threshold) {
+            if (vidValue.get(ysub[i],xsub[i])[0] > threshold) {
                 selectedpts.add(randompoints[i]);
             }
         }
