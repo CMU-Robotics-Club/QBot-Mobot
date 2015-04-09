@@ -27,6 +27,7 @@ public class Sample_algorithm {
         int vidHeight = vidRgb.height();
         int vidWidth = vidRgb.width();
         setAmount(sample);
+        selectedPoints.clear();
 
         int adjHeight = vidHeight / scale;
         int adjWidth = vidWidth / scale;
@@ -55,6 +56,12 @@ public class Sample_algorithm {
                 selectedpts.add(randompoints[i]);
             }
         }
+
+        /* If no points is selected, return value -1.0 */
+        if (selectedpts.size() < 10) {
+            return 0.0;
+        }
+
         int[] spoints = convertIntegers(selectedpts);
         int[] sxsub = ind2subx(adjWidth, spoints.length, spoints);
         int[] sysub = ind2suby(adjWidth, spoints.length, spoints);
@@ -75,12 +82,12 @@ public class Sample_algorithm {
         setSelectedPoints(nxsub1,nysub1);
 
         Mat res1 = mRegress.Regression(nxsub1,nysub1,1,true);
-        Mat res2 = mRegress.Regression(nxsub2, nysub2, 2, true);
+        Mat res2 = mRegress.Regression(nxsub2,nysub2,2, true);
 
-        double angle1 = Math.tan(res1.get(1, 0)[0]);
+        double angle1 = Math.atan(res1.get(1, 0)[0]) * 180.0 / Math.PI;
         double angle2 = calcAngleQuad(res2,adjWidth,adjHeight);
 
-        return angle1;
+        return angle2;
 
     }
 
@@ -102,13 +109,13 @@ public class Sample_algorithm {
 
     public static int[] convertIntegers(List<Integer> integers)
     {
-        int[] ret = new int[integers.size()];
+        int[] res = new int[integers.size()];
         Iterator<Integer> iterator = integers.iterator();
-        for (int i = 0; i < ret.length; i++)
+        for (int i = 0; i < res.length; i++)
         {
-            ret[i] = iterator.next().intValue();
+            res[i] = iterator.next().intValue();
         }
-        return ret;
+        return res;
     }
     private double stdofcol(Mat col, int length){
         float total = 0;
@@ -144,7 +151,7 @@ public class Sample_algorithm {
         double yd = height/2;
         double xd = a*yd*yd + b*yd + c;
         double k = (xd - width/2) / yd;
-        return Math.tan(k);
+        return Math.atan(k) * 180.0 / Math.PI;
     }
 
     public List<Point> getSelectedPoints() {
