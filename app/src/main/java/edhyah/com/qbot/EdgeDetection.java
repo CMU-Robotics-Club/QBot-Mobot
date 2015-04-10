@@ -61,7 +61,7 @@ public class EdgeDetection {
         }
         Mat points = arrayListToMat(maxes);
         Mat line = new Mat(4,1,CvType.CV_32FC1);
-        eRegress.Regression(maxes,slices,1,true);
+        //eRegress.Regression(maxes,slices,1,true);
         Imgproc.fitLine(points,line,Imgproc.CV_DIST_L2,0,0.01,0.01);
         double vx = (line.get(0,0))[0];
         double vy = (line.get(1,0))[0];
