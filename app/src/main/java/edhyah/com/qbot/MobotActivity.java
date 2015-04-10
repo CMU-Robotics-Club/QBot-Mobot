@@ -43,8 +43,8 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
     private double mTunning = 0;
     private double mSpeed = 0;
     
-    /* need to be in [0,180) */
-    private double mThreshold = 177;
+    /* need to be in [0,3) */
+    private double mThreshold = 1;
     private int mSamplingPoints = 2000;
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
@@ -264,7 +264,7 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
     }
 
     private void updateThreshold(int val, int maxVal) {
-        mThreshold = 1.0 * val;
+        mThreshold = 3.0 * val / 100;
         runOnUiThread(new Runnable() {
             @Override
             public void run() {

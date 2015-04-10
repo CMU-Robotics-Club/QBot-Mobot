@@ -3,6 +3,7 @@ package hanqis.com.qbot;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfDouble;
 import org.opencv.core.Point;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
@@ -21,7 +22,8 @@ public class Sample_algorithm {
     private Regression_algorithm mRegress = new Regression_algorithm();
     private List<Point> selectedPoints = new ArrayList<Point>();
     private static int scale = 2;
-    private double mThreshold = 90.0;
+    private double mStd = 0.0;
+    private double mMean = 90.0;
 
 
     public double Sampling(Mat vidRgb,double threshold,int sample) {
@@ -42,6 +44,11 @@ public class Sample_algorithm {
         Core.split(vidHsv, hsv_planes);
 
         Mat vidValue = hsv_planes.get(2);
+        MatOfDouble mStdMat = new MatOfDouble();
+        MatOfDouble mMeanMat = new MatOfDouble();
+        Core.meanStdDev(vidValue,mMeanMat,mStdMat);
+        mMean = mMeanMat.get(0,0)[0];
+        mStd = mStdMat.get(0,0)[0];
         int[] randompoints = new int[amount];
         for (int i = 0; i < amount; i++) {
             Random rn = new Random();
@@ -53,7 +60,7 @@ public class Sample_algorithm {
 
         ArrayList selectedpts = new ArrayList<Integer>();
         for (int i = 0; i < amount; i++) {
-            if (vidValue.get(ysub[i],xsub[i])[0] > threshold) {
+            if ((vidValue.get(ysub[i],xsub[i])[0] - mMean) > threshold * mStd) {
                 selectedpts.add(randompoints[i]);
             }
         }
