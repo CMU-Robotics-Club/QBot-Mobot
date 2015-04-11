@@ -38,9 +38,9 @@ public class Sample_algorithm {
         selectedPoints.clear();
 
         //Initialize threshold value
-        if (Math.abs(mThreshold - (0.5)) < 0.00001) {
+        //if (Math.abs(mThreshold - (0.5)) < 0.00001) {
             mThreshold = threshold;
-        }
+        //}
 
         int adjHeight = vidHeight / scale;
         int adjWidth = vidWidth / scale;
@@ -56,26 +56,32 @@ public class Sample_algorithm {
         Mat vidValue = hsv_planes.get(2);
 
         int newHeight = adjHeight - adjHeight / mCut;
-        int numOfPts = adjWidth * newHeight;
-        Rect rect = new Rect(0,adjHeight / mCut,adjWidth,newHeight);
-        Mat cropped = new Mat(vidValue,rect);
+        //int numOfPts = adjWidth * newHeight;
+        //Rect rect = new Rect(0,adjHeight / mCut,adjWidth,newHeight);
+        //Mat cropped = new Mat(vidValue,rect);
         MatOfDouble mStdMat = new MatOfDouble();
         MatOfDouble mMeanMat = new MatOfDouble();
-        Core.meanStdDev(cropped,mMeanMat,mStdMat);
-        mMean = mMeanMat.get(0,0)[0];
-        mStd = mStdMat.get(0,0)[0];
-        int[] randompoints = new int[amount];
-        for (int i = 0; i < amount; i++) {
-            Random rn = new Random();
-            randompoints[i] = rn.nextInt(numOfPts);
+        Core.meanStdDev(vidValue,mMeanMat,mStdMat);
+        mMean = mMeanMat.get(0,0)[0]; mStd = mStdMat.get(0,0)[0]; int[] randompoints = new int[amount]; for (int i = 0; i < amount; i++) { Random rn = new Random(); randompoints[i] = rn.nextInt(adjHeight * adjWidth);
         }
 
         int[] xsub = ind2subx(adjWidth, amount, randompoints);
         int[] ysub = ind2suby(adjWidth, amount, randompoints);
-
+        /*
         if(!dynamicSelection(adjHeight,adjWidth,randompoints,xsub,ysub,cropped)){
            return 0.0;
+        }*/
+
+        List <Integer> res = new ArrayList<>();
+        for (int i = 0; i < amount; i++) {
+            if ((vidValue.get(ysub[i],xsub[i])[0] - mMean) > mThreshold * mStd) {
+                res.add(randompoints[i]);
+               }
         }
+
+        if (res.size() < 10) return 0.0;
+
+        setSelectedValue(res);
         int[] spoints = convertIntegers(getSelectedValue());
         int[] sxsub = ind2subx(adjWidth, spoints.length, spoints);
         int[] sysub = ind2suby(adjWidth, spoints.length, spoints);
@@ -93,7 +99,7 @@ public class Sample_algorithm {
         int[] nxsub2 = ind2subx(adjWidth, newpoints2.length, newpoints2);
         int[] nysub2 = ind2suby(adjWidth, newpoints2.length, newpoints2);
 
-        setSelectedPoints(nxsub1,nysub1,adjHeight / mCut);
+        setSelectedPoints(nxsub1,nysub1,adjHeight);
 
         Mat res1 = mRegress.Regression(nxsub1,nysub1,1,true);
         Mat res2 = mRegress.Regression(nxsub2,nysub2,2, true);
@@ -220,7 +226,7 @@ public class Sample_algorithm {
     public void setSelectedPoints(int[] xsub,int[] ysub,int yoff){
         selectedPoints.clear();
         for (int i = 0; i < xsub.length; i++){
-            Point p = new Point(xsub[i] * scale,(ysub[i] + yoff) * scale);
+            Point p = new Point(xsub[i] * scale,(ysub[i]) * scale);
             selectedPoints.add(p);
         }
     }
