@@ -8,7 +8,7 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:id="@+id/mobot_messages"
-        android:textColor="#ff2016ff"
+        android:textColor="#ffffffff"
         android:textSize="20sp"
         android:text="@string/not_connected_msg"/>
 
@@ -16,7 +16,7 @@
         android:layout_width ="fill_parent"
         android:layout_height ="wrap_content"
         android:id="@+id/angle_test"
-        android:textColor="#ff2016ff"
+        android:textColor="#ffffffff"
         android:textSize="20sp"
         android:text="@string/not_connected_msg"/>
 
@@ -39,7 +39,7 @@
             android:id="@+id/tunning_value"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="#ff2016ff"
+            android:textColor="#ffffffff"
             android:textSize="20sp"
             android:text="@string/default_seek"
             android:layout_margin="2dp"
@@ -66,7 +66,7 @@
             android:id="@+id/speed_value"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="#ff2016ff"
+            android:textColor="#ffffffff"
             android:textSize="20sp"
             android:text="@string/default_seek"
             android:layout_margin="2dp"
@@ -93,7 +93,7 @@
             android:id="@+id/threshold_value"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="#ff2016ff"
+            android:textColor="#ffffffff"
             android:textSize="20sp"
             android:text="@string/default_seek"
             android:layout_margin="2dp"

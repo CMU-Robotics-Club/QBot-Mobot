@@ -84,7 +84,8 @@ public class Sample_algorithm {
         Mat res1 = mRegress.Regression(nxsub1,nysub1,1,true);
         Mat res2 = mRegress.Regression(nxsub2, nysub2, 2, true);
 
-        double angle1 = Math.tan(res1.get(1, 0)[0]);
+        double a = res1.get(1, 0)[0];
+        double angle1 = Math.atan2(a,1);
         double angle2 = calcAngleQuad(res2,adjWidth,adjHeight);
 
         return angle1;
