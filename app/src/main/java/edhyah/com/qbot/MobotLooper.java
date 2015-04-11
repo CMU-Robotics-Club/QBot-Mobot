@@ -28,8 +28,8 @@ class MobotLooper extends BaseIOIOLooper {
     
     // DRIVING
     private static final double DRIVE_STRAIGHT_ANGLE = .05; //deg
-    private static final double MAX_SPEED = 1; // inchec/sec
-    private static final double DELTA_T = .01; // sec TODO pass in as variable
+    private static final double MAX_SPEED = 20; // inchec/sec
+    private static final double DELTA_T = 1; // sec TODO pass in as variable
     private static final double MOBOT_DRIVETRAIN_WIDTH = 5.5; // inches
 
     public int mPwmDriveRightVal = PWM_OFF_VAL;
@@ -82,7 +82,7 @@ class MobotLooper extends BaseIOIOLooper {
         double speedRatio = 1;
         if (Math.abs(angle) > DRIVE_STRAIGHT_ANGLE) {
             // Only calculate if turning angle is significant enough
-            double turnRadius = turnDist / Math.tan(Math.toRadians(angle / 2));
+            double turnRadius = Math.abs(turnDist / 2 / Math.tan(Math.toRadians(angle / 2)));
             speedRatio = (turnRadius - MOBOT_DRIVETRAIN_WIDTH) /
                     (turnRadius + MOBOT_DRIVETRAIN_WIDTH); // Percentage
         }
@@ -103,8 +103,8 @@ class MobotLooper extends BaseIOIOLooper {
             leftSpeed *= 1 - tunning;
         }
 
-        mPwmDriveRightVal = speedToPwm(-rightSpeed); // Reversed motor
-        mPwmDriveLeftVal = speedToPwm(leftSpeed);
+        mPwmDriveRightVal = speedToPwm(-rightSpeed);
+        mPwmDriveLeftVal = speedToPwm(leftSpeed); // Reversed motor
 
         mRightMotor.setPulseWidth(mPwmDriveRightVal);
         mLeftMotor.setPulseWidth(mPwmDriveLeftVal);

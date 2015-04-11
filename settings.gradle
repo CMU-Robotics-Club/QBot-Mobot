@@ -1,4 +1,4 @@
-include ':app', 'ioioLibAndroid', ':ioioLibAndroid'
+include ':app', 'ioioLibAndroid', ':ioioLibAndroid', ':libraries'
 include ':libraries:opencv'
 include ':ioioLibAndroidDevice'
 include ':ioioLibBT'

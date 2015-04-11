@@ -36,13 +36,15 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
     private PortraitCameraView mOpenCvCameraView; // TODO add a turn off button for when not debugging
     private boolean mStatusConnected;
 
+    // private EdgeDetection eAlgorithm = new EdgeDetection();
     private Sample_algorithm mAlgorithm = new Sample_algorithm();
     private double mAngle = 0;
+
     private double mTunning = 0;
     private double mSpeed = 0;
     
-    /* need to be in [0,180) */
-    private double mThreshold = 177;
+    /* need to be in [0,3) */
+    private double mThreshold = 0.5;
     private int mSamplingPoints = 2000;
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
@@ -118,7 +120,10 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         Mat img = inputFrame.rgba();
+        // mAngle = eAlgorithm.findAngle(img);
         mAngle = mAlgorithm.Sampling(img,mThreshold,mSamplingPoints);
+        //Threshold value will show at the end threshold bar.
+        updateThreshold(0,0);
         updateAngle(mAngle);
 
         addSelectedPoints(img);
@@ -261,7 +266,8 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
     }
 
     private void updateThreshold(int val, int maxVal) {
-        mThreshold = 1.0 * val;
+        //mThreshold = 3.0 * val / 100;
+        mThreshold = mAlgorithm.getThreshold();
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
