@@ -211,7 +211,7 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
 
     private void addMaxSpeedBar() {
         SeekBar bar = (SeekBar) findViewById(R.id.max_speed_bar);
-        updateTunning(bar.getProgress(), bar.getMax());
+        updateMaxSpeed(bar.getProgress());
         bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
             @Override

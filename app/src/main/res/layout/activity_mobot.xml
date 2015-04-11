@@ -25,6 +25,15 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         style="@style/Widget.AppCompat.ProgressBar">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#ffffffff"
+            android:textSize="20sp"
+            android:text="T"
+            android:layout_margin="2dp"
+            android:layout_weight="1"/>
+
         <SeekBar
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -52,12 +61,21 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         style="@style/Widget.AppCompat.ProgressBar">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#ffffffff"
+            android:textSize="20sp"
+            android:text="M"
+            android:layout_margin="2dp"
+            android:layout_weight="1"/>
+
         <SeekBar
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/max_speed_bar"
-            android:max="100"
-            android:progress="0"
+            android:max="30"
+            android:progress="20"
             style="@android:style/Widget.Holo.SeekBar"
             android:layout_weight="5"
             android:layout_margin="2dp"/>
@@ -79,6 +97,15 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         style="@style/Widget.AppCompat.ProgressBar">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#ffffffff"
+            android:textSize="20sp"
+            android:text="S"
+            android:layout_margin="2dp"
+            android:layout_weight="1"/>
+
         <SeekBar
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -106,6 +133,15 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         style="@style/Widget.AppCompat.ProgressBar">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#ffffffff"
+            android:textSize="20sp"
+            android:text="R"
+            android:layout_margin="2dp"
+            android:layout_weight="1"/>
+
         <SeekBar
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
