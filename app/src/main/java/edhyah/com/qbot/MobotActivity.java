@@ -125,7 +125,7 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         // mAngle = eAlgorithm.findAngle(img);
         mAngle = mAlgorithm.Sampling(img,mThreshold,mSamplingPoints);
         //Threshold value will show at the end threshold bar.
-        updateThreshold(0,0);
+        //updateThreshold(0,0);
         updateAngle(mAngle);
 
         addSelectedPoints(img);
@@ -301,8 +301,8 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
     }
 
     private void updateThreshold(int val, int maxVal) {
-        //mThreshold = 3.0 * val / 100;
-        mThreshold = mAlgorithm.getThreshold();
+        mThreshold = 3.0 * val / 100;
+        //mThreshold = mAlgorithm.getThreshold();
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
