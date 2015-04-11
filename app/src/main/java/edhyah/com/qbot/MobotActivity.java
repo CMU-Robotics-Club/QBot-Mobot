@@ -38,6 +38,7 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
 
     // private EdgeDetection eAlgorithm = new EdgeDetection();
     private Sample_algorithm mAlgorithm = new Sample_algorithm();
+    private ParameterFiltering mFilt = new ParameterFiltering();
     private double mAngle = 0;
 
     private double mTunning = 0;
@@ -124,6 +125,10 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         Mat img = inputFrame.rgba();
         // mAngle = eAlgorithm.findAngle(img);
         mAngle = mAlgorithm.Sampling(img,mThreshold,mSamplingPoints);
+
+        // Filtering
+        mAngle = mFilt.filter(mAngle);
+
         //Threshold value will show at the end threshold bar.
         //updateThreshold(0,0);
         updateAngle(mAngle);
