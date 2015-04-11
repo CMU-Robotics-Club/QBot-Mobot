@@ -88,11 +88,13 @@ public class Sample_algorithm {
 
         Mat err1 = mRegress.Regression(sxsub, sysub,1,false);
         Mat err2 = mRegress.Regression(sxsub, sysub, 2, false);
-        double std1 = stdofcol(err1,sxsub.length);
-        double std2 = stdofcol(err2,sxsub.length);
+        double mean1 = meanofcol(err1,sxsub.length);
+        double mean2 = meanofcol(err2,sxsub.length);
+        double std1 = stdofcol(err1,sxsub.length,mean1);
+        double std2 = stdofcol(err2,sxsub.length,mean2);
 
-        int[] newpoints1 = removeoutliers(spoints, err1,std1,sxsub.length, 2);
-        int[] newpoints2 = removeoutliers(spoints, err2,std2,sxsub.length, 2);
+        int[] newpoints1 = removeoutliers(spoints, err1,mean1,std1,sxsub.length, 2);
+        int[] newpoints2 = removeoutliers(spoints, err2,mean2,std2,sxsub.length, 2);
 
         int[] nxsub1 = ind2subx(adjWidth, newpoints1.length, newpoints1);
         int[] nysub1 = ind2suby(adjWidth, newpoints1.length, newpoints1);
@@ -183,12 +185,15 @@ public class Sample_algorithm {
         }
         return res;
     }
-    private double stdofcol(Mat col, int length){
+    private double meanofcol(Mat col, int length){
         float total = 0;
         for (int i = 0; i < length; i++){
             total += col.get(i,0)[0];
         }
         double mean = total / length;
+        return mean;
+    }
+    private double stdofcol(Mat col, int length, double mean){
         double t = 0;
         for (int i = 0; i < length; i++){
             double err = Math.pow(col.get(i,0)[0] - mean,2.0);
@@ -197,11 +202,11 @@ public class Sample_algorithm {
         return Math.sqrt(t / (length - 1));
     }
 
-    private int[] removeoutliers(int[] data, Mat err,
+    private int[] removeoutliers(int[] data, Mat err, double mean,
                                  double std, int size, int k){
        ArrayList res = new ArrayList<Integer>();
        for (int i = 0; i < size; i++){
-           if (err.get(i,0)[0] <= k * std){
+           if (err.get(i,0)[0] - mean <= k * std){
                res.add(data[i]);
            }
        }
