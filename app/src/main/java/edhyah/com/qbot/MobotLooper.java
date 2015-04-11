@@ -28,7 +28,7 @@ class MobotLooper extends BaseIOIOLooper {
     
     // DRIVING
     private static final double DRIVE_STRAIGHT_ANGLE = .05; //deg
-    private static final double MAX_SPEED = 20; // inchec/sec
+    public static final double MAX_SPEED = 20; // inchec/sec
     private static final double DELTA_T = 1; // sec TODO pass in as variable
     private static final double MOBOT_DRIVETRAIN_WIDTH = 5.5; // inches
 
@@ -74,11 +74,12 @@ class MobotLooper extends BaseIOIOLooper {
         double angle = mMobotDriver.getDriveAngle();
         double speed = mMobotDriver.getDriveSpeed(); // Percent, negative signifies going backwards
         double tunning = mMobotDriver.getTunning();
+        double maxSpeed = mMobotDriver.getMaxSpeed();
 
         Log.i(TAG, "Angle " + angle + " Speed " + speed);
 
         // Calc SpeedRatio
-        double turnDist = Math.abs(speed) * MAX_SPEED * DELTA_T;
+        double turnDist = Math.abs(speed) * maxSpeed * DELTA_T;
         double speedRatio = 1;
         if (Math.abs(angle) > DRIVE_STRAIGHT_ANGLE) {
             // Only calculate if turning angle is significant enough
@@ -132,6 +133,7 @@ class MobotLooper extends BaseIOIOLooper {
         public double getDriveAngle();
         public double getDriveSpeed();
         public double getTunning();
+        public double getMaxSpeed();
         public void setStatusOnline(boolean status);
     }
 

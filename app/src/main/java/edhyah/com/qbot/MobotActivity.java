@@ -42,6 +42,7 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
 
     private double mTunning = 0;
     private double mSpeed = 0;
+    private double mMaxSpeed = MobotLooper.MAX_SPEED;
     
     /* need to be in [0,3) */
     private double mThreshold = 0.5;
@@ -86,6 +87,7 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         addTunningBar();
         addSpeedBar();
         addThresholdBar();
+        addMaxSpeedBar();
     }
 
     @Override
@@ -205,6 +207,41 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         return progress;
     }
 
+    //------------ Max Speed Bar -----------------------------------------------
+
+    private void addMaxSpeedBar() {
+        SeekBar bar = (SeekBar) findViewById(R.id.max_speed_bar);
+        updateTunning(bar.getProgress(), bar.getMax());
+        bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                mMaxSpeed = updateMaxSpeed(seekBar.getProgress());
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                mMaxSpeed = updateMaxSpeed(seekBar.getProgress());
+            }
+        });
+    }
+
+    private double updateMaxSpeed(int val) {
+        final double speed = val;
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                TextView msg = (TextView) findViewById(R.id.max_speed_val);
+                msg.setText(String.format("%.2f", speed));
+            }
+        });
+        return speed;
+    }
+
     //------------ Speed Bar -----------------------------------------------
 
     private void addSpeedBar() {
@@ -228,6 +265,18 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         });
     }
 
+    private double updateSpeed(int val, int maxVal) {
+        final double speed = 1.0 * val / maxVal;
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                TextView msg = (TextView) findViewById(R.id.speed_value);
+                msg.setText(String.format("%.2f", speed));
+            }
+        });
+        return speed;
+    }
+
     //------------ Threshold Bar -----------------------------------------------
 
     private void addThresholdBar() {
@@ -249,20 +298,6 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
                 updateThreshold(seekBar.getProgress(), seekBar.getMax());
             }
         });
-    }
-
-
-
-    private double updateSpeed(int val, int maxVal) {
-        final double speed = 1.0 * val / maxVal;
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                TextView msg = (TextView) findViewById(R.id.speed_value);
-                msg.setText(String.format("%.2f", speed));
-            }
-        });
-        return speed;
     }
 
     private void updateThreshold(int val, int maxVal) {
@@ -297,6 +332,9 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
 
     @Override
     public double getTunning() { return mTunning; }
+
+    @Override
+    public double getMaxSpeed() { return mMaxSpeed; }
 
     @Override
     public void setStatusOnline(boolean status) {
