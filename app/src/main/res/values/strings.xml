@@ -18,5 +18,6 @@
     <string name="connected_msg">Connected and Running</string>
     <string name="angle_front">"Angle: "</string>
     <string name="default_seek">0</string>
+    <string name="std_front">"Std: "</string>
 
 </resources>

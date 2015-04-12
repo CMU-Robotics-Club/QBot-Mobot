@@ -129,9 +129,11 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         // Filtering
         mAngle = mFilt.filter(mAngle);
 
-        //Threshold value will show at the end threshold bar.
-        //updateThreshold(0,0);
+        //(Outdated) Threshold value will show at the end threshold bar.
+        //(Outdated) updateThreshold(0,0);
         updateAngle(mAngle);
+
+        updateStd(mAlgorithm.getStandardDeviation());
 
         addSelectedPoints(img);
         addFoundLine(img, mAngle);
@@ -358,7 +360,18 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
             @Override
             public void run() {
                 TextView angle = (TextView) findViewById(R.id.angle_test);
-                angle.setText(String.format(getString(R.string.angle_front) + "%.2f", a));
+                angle.setText(String.format(getString(R.string.angle_front) + "%.2f  ", a));
+            }
+        });
+    }
+
+    private void updateStd(final double[] st){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                TextView angle = (TextView) findViewById(R.id.std_test);
+                angle.setText(String.format(getString(R.string.std_front)
+                                             + "%.2f, " + "%.2f", st[0],st[1]));
             }
         });
     }

@@ -29,6 +29,7 @@ public class Sample_algorithm {
     private double mMean = 90.0;
     //Cut off value, 1/n of the screen will not be selected.
     private int mCut = 3;
+    private double[] std = new double[2];
 
 
     public double Sampling(Mat vidRgb,double threshold,int sample) {
@@ -86,15 +87,15 @@ public class Sample_algorithm {
         int[] sxsub = ind2subx(adjWidth, spoints.length, spoints);
         int[] sysub = ind2suby(adjWidth, spoints.length, spoints);
 
-        Mat err1 = mRegress.Regression(sxsub, sysub,1,false);
-        Mat err2 = mRegress.Regression(sxsub, sysub, 2, false);
-        double mean1 = meanofcol(err1,sxsub.length);
-        double mean2 = meanofcol(err2,sxsub.length);
-        double std1 = stdofcol(err1,sxsub.length,mean1);
-        double std2 = stdofcol(err2,sxsub.length,mean2);
+        Mat errA1 = mRegress.Regression(sxsub, sysub,1,false);
+        Mat errB1 = mRegress.Regression(sxsub, sysub, 2, false);
+        double meanA1 = meanofcol(errA1,sxsub.length);
+        double meanB1 = meanofcol(errB1,sxsub.length);
+        double stdA1 = stdofcol(errA1,sxsub.length,meanA1);
+        double stdB1 = stdofcol(errB1,sxsub.length,meanB1);
 
-        int[] newpoints1 = removeoutliers(spoints, err1,mean1,std1,sxsub.length, 2);
-        int[] newpoints2 = removeoutliers(spoints, err2,mean2,std2,sxsub.length, 2);
+        int[] newpoints1 = removeoutliers(spoints, errA1,meanA1,stdA1,sxsub.length, 2);
+        int[] newpoints2 = removeoutliers(spoints, errB1,meanB1,stdB1,sxsub.length, 2);
 
         int[] nxsub1 = ind2subx(adjWidth, newpoints1.length, newpoints1);
         int[] nysub1 = ind2suby(adjWidth, newpoints1.length, newpoints1);
@@ -102,6 +103,14 @@ public class Sample_algorithm {
         int[] nysub2 = ind2suby(adjWidth, newpoints2.length, newpoints2);
 
         setSelectedPoints(nxsub1,nysub1,adjHeight);
+
+        Mat errA2 = mRegress.Regression(nxsub1,nysub1,1,false);
+        Mat errB2 = mRegress.Regression(nxsub2,nysub2,2,false);
+        double meanA2 = meanofcol(errA2,nxsub1.length);
+        double meanB2 = meanofcol(errB2,nxsub2.length);
+        double stdA2 = stdofcol(errA2,nxsub1.length,meanA2);
+        double stdB2 = stdofcol(errB2,nxsub2.length,meanB2);
+        setStandardDeviation(stdA2,stdB2);
 
         Mat res1 = mRegress.Regression(nxsub1,nysub1,1,true);
         Mat res2 = mRegress.Regression(nxsub2,nysub2,2, true);
@@ -242,7 +251,11 @@ public class Sample_algorithm {
 
     public double getThreshold() {return mThreshold;}
 
-    private void setAmount(int sample){
-        amount = sample;
+    private void setAmount(int sample){ amount = sample;}
+
+    private void setStandardDeviation(double std1,double std2){
+        std[0] = std1;
+        std[1] = std2;
     }
+    public double[] getStandardDeviation(){return std;}
 }
