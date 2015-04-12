@@ -4,9 +4,11 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.SurfaceView;
 import android.view.WindowManager;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -33,17 +35,19 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
     private static final String PREF_KEY_TUNNING = "edhyah.com.qbot.MobotActivity.PREF_KEY_TUNNING";
     private static final float DEFAULT_TUNNING = 0;
     private static final int POINT_THICKNESS = 2;
+    private SharedPreferences mSharedPref;
     private PortraitCameraView mOpenCvCameraView; // TODO add a turn off button for when not debugging
     private boolean mStatusConnected;
 
     // private EdgeDetection eAlgorithm = new EdgeDetection();
     private Sample_algorithm mAlgorithm = new Sample_algorithm();
-    private ParameterFiltering mFilt = new ParameterFiltering();
+    private ParameterFiltering mFilt;
     private double mAngle = 0;
 
     private double mTunning = 0;
     private double mSpeed = 0;
     private double mMaxSpeed = MobotLooper.MAX_SPEED;
+    private ParameterBar mTestBar;
     
     /* need to be in [0,3) */
     private double mThreshold = 0.5;
@@ -73,6 +77,8 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_6, this, mLoaderCallback);
     }
 
+    //------------------------------------------------------------
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         Log.i(TAG, "called onCreate");
@@ -85,10 +91,13 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
         mOpenCvCameraView.setCvCameraViewListener(this);
 
-        addTunningBar();
         addSpeedBar();
-        addThresholdBar();
-        addMaxSpeedBar();
+        mSharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        mThreshold = mSharedPref.getFloat(MainActivity.PREF_THRESHOLD, -1);
+        Log.i(TAG, "Thresh " + mThreshold);
+
+        mFilt = new ParameterFiltering(getP(), getI(), getD());
+
     }
 
     @Override
@@ -157,101 +166,11 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         }
     }
 
-    //------------ Tuning Mobot -------------------------------------------
-
-    private void addTunningBar() {
-        SeekBar tunningBar = (SeekBar) findViewById(R.id.tuningParams);
-        tunningBar.setProgress(loadTunning(tunningBar.getMax()));
-        updateTunning(tunningBar.getProgress(), tunningBar.getMax());
-        tunningBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                mTunning = updateTunning(progress, seekBar.getMax());
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                // Store and save value
-                mTunning = calcTunning(seekBar.getProgress(), seekBar.getMax());
-                saveTunning(mTunning);
-            }
-        });
-    }
-
-    private double calcTunning(int value, int maxValue) {
-        return (2.0 * value / maxValue) - 1; // Map to -1:1
-    }
-
-    private void saveTunning(double val) {
-        SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putFloat(PREF_KEY_TUNNING, (float)val);
-        editor.commit();
-    }
-
-    private int loadTunning(int maxVal) {
-        SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
-        double tunning = sharedPref.getFloat(PREF_KEY_TUNNING, DEFAULT_TUNNING);
-        return (int)Math.round(((tunning + 1) / 2) * maxVal);
-    }
-
-    private double updateTunning(int val, int maxVal) {
-        final double progress = calcTunning(val, maxVal);
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                TextView msg = (TextView) findViewById(R.id.tunning_value);
-                msg.setText(String.format("%.2f", progress));
-            }
-        });
-        return progress;
-    }
-
-    //------------ Max Speed Bar -----------------------------------------------
-
-    private void addMaxSpeedBar() {
-        SeekBar bar = (SeekBar) findViewById(R.id.max_speed_bar);
-        updateMaxSpeed(bar.getProgress());
-        bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                mMaxSpeed = updateMaxSpeed(seekBar.getProgress());
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                mMaxSpeed = updateMaxSpeed(seekBar.getProgress());
-            }
-        });
-    }
-
-    private double updateMaxSpeed(int val) {
-        final double speed = val;
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                TextView msg = (TextView) findViewById(R.id.max_speed_val);
-                msg.setText(String.format("%.2f", speed));
-            }
-        });
-        return speed;
-    }
-
     //------------ Speed Bar -----------------------------------------------
 
     private void addSpeedBar() {
-        SeekBar speedBar = (SeekBar) findViewById(R.id.speedbar);
-        updateTunning(speedBar.getProgress(), speedBar.getMax());
+        SeekBar speedBar = (SeekBar) findViewById(R.id.speed_bar);
+        mSpeed = updateSpeed(speedBar.getProgress(), speedBar.getMax());
         speedBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
             @Override
@@ -275,47 +194,11 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                TextView msg = (TextView) findViewById(R.id.speed_value);
+                TextView msg = (TextView) findViewById(R.id.speed_val);
                 msg.setText(String.format("%.2f", speed));
             }
         });
         return speed;
-    }
-
-    //------------ Threshold Bar -----------------------------------------------
-
-    private void addThresholdBar() {
-        SeekBar thresholdBar = (SeekBar) findViewById(R.id.threshold_bar);
-        updateThreshold(thresholdBar.getProgress(), thresholdBar.getMax());
-        thresholdBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                updateThreshold(seekBar.getProgress(), seekBar.getMax());
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                updateThreshold(seekBar.getProgress(), seekBar.getMax());
-            }
-        });
-    }
-
-    private void updateThreshold(int val, int maxVal) {
-        mThreshold = 3.0 * val / 100;
-        //mThreshold = mAlgorithm.getThreshold();
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                TextView msg = (TextView) findViewById(R.id.threshold_value);
-                msg.setText(String.format("%.2f", mThreshold));
-            }
-        });
-
     }
 
     //------------ Driving Mobot -------------------------------------------
@@ -336,10 +219,14 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
     }
 
     @Override
-    public double getTunning() { return mTunning; }
+    public double getTunning() { return mSharedPref.getFloat(MainActivity.PREF_TUNNING, 0); }
 
     @Override
-    public double getMaxSpeed() { return mMaxSpeed; }
+    public double getMaxSpeed() { return mSharedPref.getFloat(MainActivity.PREF_MAX_SPEED, 0); }
+
+    public double getP() { return mSharedPref.getFloat(MainActivity.PREF_PID_P, 0); }
+    public double getI() { return mSharedPref.getFloat(MainActivity.PREF_PID_I, 0); }
+    public double getD() { return mSharedPref.getFloat(MainActivity.PREF_PID_D, 0); }
 
     @Override
     public void setStatusOnline(boolean status) {

@@ -1,9 +1,12 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin" tools:context=".MainActivity">
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:id="@+id/main_main"
+    tools:context=".MainActivity"
+    android:orientation="vertical">
 
     <TextView
         android:id="@+id/qbot_text"
@@ -12,27 +15,10 @@
         android:text="@string/qbot_welcome"/>
 
     <Button
-        android:id="@+id/button_hanqis"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/button_hanqis"
-        android:layout_below="@+id/qbot_text"
-        android:onClick="start_Hanqis_activity" />
-
-    <Button
-        android:id="@+id/button_edward"
-        android:layout_below="@+id/button_hanqis"
-        android:text="@string/edward_activity"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:onClick="startactivity_edward_activity"/>
-
-    <Button
         android:id="@+id/btn_mobot"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:text="@string/btn_mobot"
-        android:onClick="startMobotActivity"
-        android:layout_below="@+id/button_edward" />
+        android:onClick="startMobotActivity" />
 
-</RelativeLayout>
+</LinearLayout>

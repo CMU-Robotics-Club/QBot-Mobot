@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <TextView
+        android:id="@+id/param_label"
+        android:layout_width="30dp"
+        android:layout_height="wrap_content"
+        android:textColor="#ffffffff"
+        android:textSize="20sp"
+        android:layout_margin="2dp"
+        android:layout_weight="1"/>
+
+    <SeekBar
+        android:id="@+id/param_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@android:style/Widget.Holo.SeekBar"
+        android:layout_weight="6"
+        android:layout_margin="2dp"/>
+
+    <TextView
+        android:id="@+id/param_val"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#ffffffff"
+        android:textSize="20sp"
+        android:layout_margin="2dp"
+        android:layout_weight="1"/>
+
+</merge>

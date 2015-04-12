@@ -7,13 +7,38 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 
 public class MainActivity extends Activity {
+
+    public static final String PREF_MAX_SPEED = "edhyah.com.qbot.pref.MAX_SPEED";
+    public static final String PREF_TUNNING = "edhyah.com.qbot.pref.TUNNING";
+    public static final String PREF_THRESHOLD = "edhyah.com.qbot.pref.THRESHOLD";
+    public static final String PREF_PID_P = "edhyah.com.qbot.pref.PID_P";
+    public static final String PREF_PID_I = "edhyah.com.qbot.pref.PID_I";
+    public static final String PREF_PID_D = "edhyah.com.qbot.pref.PID_D";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        LinearLayout layout = (LinearLayout) findViewById(R.id.main_main);
+
+        // Add Bars
+        ParameterBar maxSpeedBar = new ParameterBar(this, "MS", PREF_MAX_SPEED, 30, 0.0, 30.0, 20.0);
+        layout.addView(maxSpeedBar);
+        ParameterBar tuneBar = new ParameterBar(this, "Tn", PREF_TUNNING, 200, -1.0, 1.0, 0.0);
+        layout.addView(tuneBar);
+        ParameterBar threshBar = new ParameterBar(this, "Th", PREF_THRESHOLD, 300, 0.0, 3.0, 1.0);
+        layout.addView(threshBar);
+        ParameterBar pidPBar = new ParameterBar(this, "P", PREF_PID_P, 100, 0.0, 1.0, 1.0);
+        layout.addView(pidPBar);
+        ParameterBar pidIBar = new ParameterBar(this, "I", PREF_PID_I, 100, 0.0, 1.0, 0.0);
+        layout.addView(pidIBar);
+        ParameterBar pidDBar = new ParameterBar(this, "D", PREF_PID_D, 100, 0.0, 1.0, 0.0);
+        layout.addView(pidDBar);
     }
 
 
@@ -37,16 +62,6 @@ public class MainActivity extends Activity {
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    public void start_Hanqis_activity(View v) {
-        Intent i = new Intent(this, Hanqis_activity.class);
-        startActivity(i);
-    }
-
-    public void startactivity_edward_activity(View view) {
-        Intent intent = new Intent(this, edward_activity.class);
-        startActivity(intent);
     }
 
     public void startMobotActivity(View view) {

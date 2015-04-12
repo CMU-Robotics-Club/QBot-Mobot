@@ -1,5 +1,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:opencv="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/mobot_main"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical">
@@ -30,78 +31,6 @@
             android:layout_height="wrap_content"
             android:textColor="#ffffffff"
             android:textSize="20sp"
-            android:text="T"
-            android:layout_margin="2dp"
-            android:layout_weight="1"/>
-
-        <SeekBar
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/tuningParams"
-            android:max="100"
-            android:progress="50"
-            style="@android:style/Widget.Holo.SeekBar"
-            android:layout_weight="5"
-            android:layout_margin="2dp"/>
-
-        <TextView
-            android:id="@+id/tunning_value"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="#ffffffff"
-            android:textSize="20sp"
-            android:text="@string/default_seek"
-            android:layout_margin="2dp"
-            android:layout_weight="1"/>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        style="@style/Widget.AppCompat.ProgressBar">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="#ffffffff"
-            android:textSize="20sp"
-            android:text="M"
-            android:layout_margin="2dp"
-            android:layout_weight="1"/>
-
-        <SeekBar
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/max_speed_bar"
-            android:max="30"
-            android:progress="20"
-            style="@android:style/Widget.Holo.SeekBar"
-            android:layout_weight="5"
-            android:layout_margin="2dp"/>
-
-        <TextView
-            android:id="@+id/max_speed_val"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="#ffffffff"
-            android:textSize="20sp"
-            android:text="@string/default_seek"
-            android:layout_margin="2dp"
-            android:layout_weight="1"/>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        style="@style/Widget.AppCompat.ProgressBar">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="#ffffffff"
-            android:textSize="20sp"
             android:text="S"
             android:layout_margin="2dp"
             android:layout_weight="1"/>
@@ -109,51 +38,15 @@
         <SeekBar
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/speedbar"
-            android:max="100"
-            android:progress="0"
+            android:id="@+id/speed_bar"
+            android:max="30"
+            android:progress="20"
             style="@android:style/Widget.Holo.SeekBar"
             android:layout_weight="5"
             android:layout_margin="2dp"/>
 
         <TextView
-            android:id="@+id/speed_value"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="#ffffffff"
-            android:textSize="20sp"
-            android:text="@string/default_seek"
-            android:layout_margin="2dp"
-            android:layout_weight="1"/>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        style="@style/Widget.AppCompat.ProgressBar">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="#ffffffff"
-            android:textSize="20sp"
-            android:text="R"
-            android:layout_margin="2dp"
-            android:layout_weight="1"/>
-
-        <SeekBar
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/threshold_bar"
-            android:max="100"
-            android:progress="0"
-            style="@android:style/Widget.Holo.SeekBar"
-            android:layout_weight="5"
-            android:layout_margin="2dp"/>
-
-        <TextView
-            android:id="@+id/threshold_value"
+            android:id="@+id/speed_val"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="#ffffffff"

@@ -134,6 +134,9 @@ class MobotLooper extends BaseIOIOLooper {
         public double getDriveSpeed();
         public double getTunning();
         public double getMaxSpeed();
+        public double getP();
+        public double getI();
+        public double getD();
         public void setStatusOnline(boolean status);
     }
 

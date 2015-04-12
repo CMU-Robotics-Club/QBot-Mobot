@@ -6,20 +6,24 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * Created by Spencer on 4/11/2015.
- */
 public class ParameterFiltering {
 
-    private static final double PID_P = 1;
-    private static final double PID_I = 0;
-    private static final double PID_D = 0;
+    private double PID_P = 1;
+    private double PID_I = 0;
+    private double PID_D = 0;
     private static final double[] LP_FLT = {.3, .3, .2, .1, .1 , .1, .1};
     private static final double TARGET_VAL = 0;
     private static final String TAG = "ParameterFiltering";
     private List<Double> mPastVals;
     private double mPidErr;
     private double mPrevVal = 0;
+
+    public ParameterFiltering(double P, double I, double D) {
+        this();
+        PID_P = P;
+        PID_I = I;
+        PID_D = D;
+    }
 
     public ParameterFiltering() {
         Double[] a = new Double[LP_FLT.length];
