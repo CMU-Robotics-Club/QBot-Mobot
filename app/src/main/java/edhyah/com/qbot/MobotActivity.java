@@ -32,11 +32,9 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
 
     private static final String TAG = "MobotActivity";
     private static final int LINE_THICKNESS = 5;
-    private static final String PREF_KEY_TUNNING = "edhyah.com.qbot.MobotActivity.PREF_KEY_TUNNING";
-    private static final float DEFAULT_TUNNING = 0;
     private static final int POINT_THICKNESS = 2;
     private SharedPreferences mSharedPref;
-    private PortraitCameraView mOpenCvCameraView; // TODO add a turn off button for when not debugging
+    private PortraitCameraView mOpenCvCameraView;
     private boolean mStatusConnected;
 
     // private EdgeDetection eAlgorithm = new EdgeDetection();

@@ -35,7 +35,7 @@ public class MainActivity extends Activity {
         layout.addView(threshBar);
         ParameterBar pidPBar = new ParameterBar(this, "P", PREF_PID_P, 100, 0.0, 1.0, 1.0);
         layout.addView(pidPBar);
-        ParameterBar pidIBar = new ParameterBar(this, "I", PREF_PID_I, 100, 0.0, 1.0, 0.0);
+        ParameterBar pidIBar = new ParameterBar(this, "I", PREF_PID_I, 100, 0.0, 0.1, 0.0);
         layout.addView(pidIBar);
         ParameterBar pidDBar = new ParameterBar(this, "D", PREF_PID_D, 100, 0.0, 1.0, 0.0);
         layout.addView(pidDBar);
