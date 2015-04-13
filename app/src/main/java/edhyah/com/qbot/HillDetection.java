@@ -13,7 +13,7 @@ import android.hardware.SensorManager;
 public class HillDetection implements SensorEventListener {
     private SensorManager senSensorManager;
     private Sensor senAccelerometer;
-    private static final int HILL_THRESHOLD = 5;
+    private static final int HILL_THRESHOLD = 6;
     private boolean onHill = false;
     private int numHillsPassed = 0;
     private long lastUpdate = 0;

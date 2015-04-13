@@ -43,8 +43,8 @@ class MobotLooper extends BaseIOIOLooper {
     private int mLedToggleCounter = LED_TOGGLE_DELAY;
 
     // Hill detection
-    private boolean onHill = false;
-    private int numHillsPassed = 0;
+    public boolean onHill = false;
+    public int numHillsPassed = 0;
     private HillDetection mHillDetect;
 
     public MobotLooper(Context context, MobotDriver mobotDriver) {
