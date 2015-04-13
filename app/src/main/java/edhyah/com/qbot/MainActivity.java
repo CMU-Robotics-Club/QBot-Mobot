@@ -18,6 +18,8 @@ public class MainActivity extends Activity {
     public static final String PREF_PID_P = "edhyah.com.qbot.pref.PID_P";
     public static final String PREF_PID_I = "edhyah.com.qbot.pref.PID_I";
     public static final String PREF_PID_D = "edhyah.com.qbot.pref.PID_D";
+    public static final String PREF_DIMENSION = "edhyah.com.qbot.pref.DIMENSION";
+    public static final String PREF_STD_THRESHOLD = "edhyah.com.qbot.pref.STD_THRESHOLD";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +41,10 @@ public class MainActivity extends Activity {
         layout.addView(pidIBar);
         ParameterBar pidDBar = new ParameterBar(this, "D", PREF_PID_D, 100, 0.0, 1.0, 0.0);
         layout.addView(pidDBar);
+        ParameterBar dimensionBar = new ParameterBar(this, "RD",PREF_DIMENSION,4,1.0,5.0,2.0);
+        layout.addView(dimensionBar);
+        ParameterBar stdThreshBar = new ParameterBar(this,"SdTh",PREF_STD_THRESHOLD,100,0.0,100.0,25.0);
+        layout.addView(stdThreshBar);
     }
 
 

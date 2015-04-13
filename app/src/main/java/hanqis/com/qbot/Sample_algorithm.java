@@ -20,27 +20,37 @@ import java.util.Random;
 public class Sample_algorithm {
 
     private static int amount;
-    private Regression_algorithm mRegress = new Regression_algorithm();
-    private List<Point> selectedPoints = new ArrayList<Point>();
+    private List<Point> selectedPointsA = new ArrayList<Point>();
+    private List<Point> selectedPointsB = new ArrayList<>();
+
     private List<Integer> selectedValue = new ArrayList<>();
     private static int scale = 2;
     private double mStd = 0.0;
     private double mThreshold = -1.0;
     private double mMean = 90.0;
+
+
+    private double resStd = 0.0;
     //Cut off value, 1/n of the screen will not be selected.
-    private int mCut = 3;
-    private double[] std = new double[2];
+    //private int mCut = 3;
+    //private double[] std = new double[2];
+
+    private boolean Split = false;
 
 
-    public double Sampling(Mat vidRgb,double threshold,int sample) {
+    public double[] Sampling(Mat vidRgb,int dimension,double threshold,int sample,int stdThreshold) {
+
+        double[] angleRes = new double[2];
+
         int vidHeight = vidRgb.height();
         int vidWidth = vidRgb.width();
         setAmount(sample);
-        selectedPoints.clear();
+        selectedPointsA = new ArrayList<>();
+        selectedPointsB = new ArrayList<>();
 
         //Initialize threshold value
         //if (Math.abs(mThreshold - (0.5)) < 0.00001) {
-            mThreshold = threshold;
+        mThreshold = threshold;
         //}
 
         int adjHeight = vidHeight / scale;
@@ -56,22 +66,31 @@ public class Sample_algorithm {
 
         Mat vidValue = hsv_planes.get(2);
 
+        /*
         int newHeight = adjHeight - adjHeight / mCut;
-        //int numOfPts = adjWidth * newHeight;
-        //Rect rect = new Rect(0,adjHeight / mCut,adjWidth,newHeight);
-        //Mat cropped = new Mat(vidValue,rect);
+        int numOfPts = adjWidth * newHeight;
+        Rect rect = new Rect(0,adjHeight / mCut,adjWidth,newHeight);
+        Mat cropped = new Mat(vidValue,rect);
+        */
+
         MatOfDouble mStdMat = new MatOfDouble();
         MatOfDouble mMeanMat = new MatOfDouble();
         Core.meanStdDev(vidValue,mMeanMat,mStdMat);
-        mMean = mMeanMat.get(0,0)[0]; mStd = mStdMat.get(0,0)[0]; int[] randompoints = new int[amount]; for (int i = 0; i < amount; i++) { Random rn = new Random(); randompoints[i] = rn.nextInt(adjHeight * adjWidth);
+        mMean = mMeanMat.get(0,0)[0];
+        mStd = mStdMat.get(0,0)[0];
+        int[] randompoints = new int[amount];
+        for (int i = 0; i < amount; i++) {
+            Random rn = new Random();
+            randompoints[i] = rn.nextInt(adjHeight * adjWidth);
         }
 
-        int[] xsub = ind2subx(adjWidth, amount, randompoints);
-        int[] ysub = ind2suby(adjWidth, amount, randompoints);
         /*
         if(!dynamicSelection(adjHeight,adjWidth,randompoints,xsub,ysub,cropped)){
            return 0.0;
         }*/
+
+        int[] xsub = ind2subx(adjWidth, amount, randompoints);
+        int[] ysub = ind2suby(adjWidth, amount, randompoints);
 
         List <Integer> res = new ArrayList<>();
         for (int i = 0; i < amount; i++) {
@@ -80,45 +99,37 @@ public class Sample_algorithm {
                }
         }
 
-        if (res.size() < 10) return 0.0;
-
+        if (res.size() < 10) {
+            angleRes[0] = 0.0;
+            angleRes[1] = 0.0;
+            return angleRes;
+        }
         setSelectedValue(res);
-        int[] spoints = convertIntegers(getSelectedValue());
-        int[] sxsub = ind2subx(adjWidth, spoints.length, spoints);
-        int[] sysub = ind2suby(adjWidth, spoints.length, spoints);
 
-        Mat errA1 = mRegress.Regression(sxsub, sysub,1,false);
-        Mat errB1 = mRegress.Regression(sxsub, sysub, 2, false);
-        double meanA1 = meanofcol(errA1,sxsub.length);
-        double meanB1 = meanofcol(errB1,sxsub.length);
-        double stdA1 = stdofcol(errA1,sxsub.length,meanA1);
-        double stdB1 = stdofcol(errB1,sxsub.length,meanB1);
+        int[] spoints = convertIntegers(res);
+        Sample_help regressRes = new Sample_help(spoints,adjWidth,dimension,scale);
+        setResStd(regressRes.getStandardDeviation());
 
-        int[] newpoints1 = removeoutliers(spoints, errA1,meanA1,stdA1,sxsub.length, 2);
-        int[] newpoints2 = removeoutliers(spoints, errB1,meanB1,stdB1,sxsub.length, 2);
+        if ((int) regressRes.getStandardDeviation() >= stdThreshold) {
+           Split = true;
+           int[][] Npts = regressRes.splitIntoTwo(regressRes.getNpts(),
+                   regressRes.getErr2(),
+                   regressRes.getNpts().length, adjWidth);
+            Sample_help regressU = new Sample_help(Npts[0],adjWidth,dimension,scale);
+            Sample_help regressD = new Sample_help(Npts[1],adjWidth,dimension,scale);
+            selectedPointsA = regressU.getSelectedPoints();
+            selectedPointsB = regressD.getSelectedPoints();
 
-        int[] nxsub1 = ind2subx(adjWidth, newpoints1.length, newpoints1);
-        int[] nysub1 = ind2suby(adjWidth, newpoints1.length, newpoints1);
-        int[] nxsub2 = ind2subx(adjWidth, newpoints2.length, newpoints2);
-        int[] nysub2 = ind2suby(adjWidth, newpoints2.length, newpoints2);
+            angleRes[0] = calcAngle(regressU.getRes(),dimension,adjWidth,adjHeight);
+            angleRes[1] = calcAngle(regressD.getRes(),dimension,adjWidth,adjHeight);
+        } else {
+            double angle = calcAngle(regressRes.getRes(), dimension, adjWidth, adjHeight);
+            selectedPointsA = regressRes.getSelectedPoints();
+            angleRes[0] = angle;
+            angleRes[1] = 0.0;
+        }
 
-        setSelectedPoints(nxsub1,nysub1,adjHeight);
-
-        Mat errA2 = mRegress.Regression(nxsub1,nysub1,1,false);
-        Mat errB2 = mRegress.Regression(nxsub2,nysub2,2,false);
-        double meanA2 = meanofcol(errA2,nxsub1.length);
-        double meanB2 = meanofcol(errB2,nxsub2.length);
-        double stdA2 = stdofcol(errA2,nxsub1.length,meanA2);
-        double stdB2 = stdofcol(errB2,nxsub2.length,meanB2);
-        setStandardDeviation(stdA2,stdB2);
-
-        Mat res1 = mRegress.Regression(nxsub1,nysub1,1,true);
-        Mat res2 = mRegress.Regression(nxsub2,nysub2,2, true);
-        double angle1 = Math.atan(res1.get(1, 0)[0]) * 180.0 / Math.PI;
-        double angle2 = calcAngleQuad(res2,adjWidth,adjHeight);
-
-        return angle2;
-
+        return angleRes;
     }
 
     private int[] ind2subx(int width, int length, int[] loc){
@@ -137,6 +148,56 @@ public class Sample_algorithm {
         return res;
     }
 
+    public static int[] convertIntegers(List<Integer> integers)
+    {
+        int[] res = new int[integers.size()];
+        Iterator<Integer> iterator = integers.iterator();
+        for (int i = 0; i < res.length; i++)
+        {
+            res[i] = iterator.next().intValue();
+        }
+        return res;
+    }
+
+
+
+
+    private double calcAngle(double[] res,int dimension, int width,int height){
+        double yd = height/2;
+        double xd = 0.0;
+        for(int i = 0; i <= dimension; i++){
+            xd += Math.pow(yd,i) * res[i];
+        }
+        double k = (xd - width/2) / yd;
+        double angle = Math.atan(k) * 180.0 / Math.PI;
+        return angle;
+    }
+
+    public List<List<Point>> getSelectedPoints() {
+        List<List<Point>> res = new ArrayList<>();
+        res.add(selectedPointsA);
+        res.add(selectedPointsB);
+        return res;
+    }
+
+    private List<Integer> getSelectedValue() { return selectedValue;}
+
+    private void setSelectedValue(List<Integer> input){ selectedValue = input;}
+
+    public double getThreshold() {return mThreshold;}
+
+    private void setAmount(int sample){ amount = sample;}
+
+    public boolean getSplit(){ return Split;}
+
+    public double getResStd() {
+        return resStd;
+    }
+
+    public void setResStd(double resStd) {
+        this.resStd = resStd;
+    }
+/*
     private boolean dynamicSelection(int wid,int hei,int[] randPts,int[] x, int[]y, Mat V){
 
         List<Integer> selectedLoc = new ArrayList<Integer>();
@@ -148,7 +209,6 @@ public class Sample_algorithm {
         int count = 5;
 
         selectedLoc = selectionHelp(mainxa,mainxb,mainya,mainyb,randPts,x,y,V,count,0);
-        /* If not enough points is selected, return value 0.0 */
         if (selectedLoc.size() < 10) {
             return false;
         }
@@ -183,79 +243,6 @@ public class Sample_algorithm {
         }
         return res;
     }
+    */
 
-    public static int[] convertIntegers(List<Integer> integers)
-    {
-        int[] res = new int[integers.size()];
-        Iterator<Integer> iterator = integers.iterator();
-        for (int i = 0; i < res.length; i++)
-        {
-            res[i] = iterator.next().intValue();
-        }
-        return res;
-    }
-    private double meanofcol(Mat col, int length){
-        float total = 0;
-        for (int i = 0; i < length; i++){
-            total += col.get(i,0)[0];
-        }
-        double mean = total / length;
-        return mean;
-    }
-    private double stdofcol(Mat col, int length, double mean){
-        double t = 0;
-        for (int i = 0; i < length; i++){
-            double err = Math.pow(col.get(i,0)[0] - mean,2.0);
-            t += err;
-        }
-        return Math.sqrt(t / (length - 1));
-    }
-
-    private int[] removeoutliers(int[] data, Mat err, double mean,
-                                 double std, int size, int k){
-       ArrayList res = new ArrayList<Integer>();
-       for (int i = 0; i < size; i++){
-           if (err.get(i,0)[0] - mean <= k * std){
-               res.add(data[i]);
-           }
-       }
-       return convertIntegers(res);
-    }
-
-
-    private double calcAngleQuad(Mat res, int width,int height){
-        double c = res.get(0,0)[0];
-        double b = res.get(1,0)[0];
-        double a = res.get(2,0)[0];
-        double yd = height/2;
-        double xd = a*yd*yd + b*yd + c;
-        double k = (xd - width/2) / yd;
-        return Math.atan(k) * 180.0 / Math.PI;
-    }
-
-    public List<Point> getSelectedPoints() {
-        return selectedPoints;
-    }
-
-    public void setSelectedPoints(int[] xsub,int[] ysub,int yoff){
-        selectedPoints.clear();
-        for (int i = 0; i < xsub.length; i++){
-            Point p = new Point(xsub[i] * scale,(ysub[i]) * scale);
-            selectedPoints.add(p);
-        }
-    }
-
-    private List<Integer> getSelectedValue() { return selectedValue;}
-
-    private void setSelectedValue(List<Integer> input){ selectedValue = input;}
-
-    public double getThreshold() {return mThreshold;}
-
-    private void setAmount(int sample){ amount = sample;}
-
-    private void setStandardDeviation(double std1,double std2){
-        std[0] = std1;
-        std[1] = std2;
-    }
-    public double[] getStandardDeviation(){return std;}
 }

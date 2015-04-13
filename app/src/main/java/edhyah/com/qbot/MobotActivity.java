@@ -33,6 +33,8 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
     private static final String TAG = "MobotActivity";
     private static final int LINE_THICKNESS = 5;
     private static final int POINT_THICKNESS = 2;
+    private static final int LEFT = 1;
+    private static final int RIGHT = 0;
     private SharedPreferences mSharedPref;
     private PortraitCameraView mOpenCvCameraView;
     private boolean mStatusConnected;
@@ -40,7 +42,10 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
     // private EdgeDetection eAlgorithm = new EdgeDetection();
     private Sample_algorithm mAlgorithm = new Sample_algorithm();
     private ParameterFiltering mFilt;
-    private double mAngle = 0;
+    private double[] mAngle = new double[2];
+    private int mLineChoice = 0;
+    private double mAngleFinal = 0.0;
+    private boolean mSplit = false;
 
     private double mTunning = 0;
     private double mSpeed = 0;
@@ -50,6 +55,9 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
     /* need to be in [0,3) */
     private double mThreshold = 0.5;
     private int mSamplingPoints = 2000;
+    private int mStdThreshold = 25;
+    private int mDimension = 2;
+    private int counter = 0;
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -95,6 +103,7 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         Log.i(TAG, "Thresh " + mThreshold);
 
         mFilt = new ParameterFiltering(getP(), getI(), getD());
+        mDimension = (int) mSharedPref.getFloat(MainActivity.PREF_DIMENSION, 2);
 
     }
 
@@ -131,38 +140,81 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         Mat img = inputFrame.rgba();
         // mAngle = eAlgorithm.findAngle(img);
-        mAngle = mAlgorithm.Sampling(img,mThreshold,mSamplingPoints);
+        mAngle = mAlgorithm.Sampling(img,mDimension,mThreshold,mSamplingPoints,mStdThreshold);
+        mSplit = mAlgorithm.getSplit();
+
+        if (!mSplit) {mAngleFinal = mAngle[0];}
+        else {mAngleFinal = mAngle[mLineChoice];}
+
 
         // Filtering
-        mAngle = mFilt.filter(mAngle);
+        mAngleFinal = mFilt.filter(mAngleFinal);
 
         //(Outdated) Threshold value will show at the end threshold bar.
         //(Outdated) updateThreshold(0,0);
-        updateAngle(mAngle);
+        updateAngle(mAngleFinal);
 
-        updateStd(mAlgorithm.getStandardDeviation());
+        updateStd(mAlgorithm.getResStd());
 
-        addSelectedPoints(img);
-        addFoundLine(img, mAngle);
+        addSelectedPoints(img,mSplit);
+        addFoundLine(img,mAngle,mSplit);
         return img;
     }
 
-    private void addFoundLine(Mat img, double mAngle) {
+    private void addFoundLine(Mat img, double[] angle, boolean split) {
         int height = img.height();
         int width = img.width();
-        Point p1 = new Point(width/2,height);
-        Point p2 = new Point(width/2 + height*Math.sin(Math.toRadians(mAngle)),
-                height*(1 - Math.cos(Math.toRadians(mAngle))));
+        Point p1 = new Point(width / 2, height);
+        Point p2 = new Point(width / 2 + height * Math.sin(Math.toRadians(angle[0])),
+                       height * (1 - Math.cos(Math.toRadians(angle[0]))));
         int red = Color.RED;
-        Core.line(img, p1, p2, new Scalar(Color.red(red), Color.blue(red), Color.green(red)), LINE_THICKNESS);
+        int blue = Color.CYAN;
+        if (!split) {
+            Core.line(img, p1, p2, new Scalar(Color.red(red), Color.blue(red), Color.green(red)), LINE_THICKNESS);
+        } else {
+            Point p3 = new Point(width / 2 + height * Math.sin(Math.toRadians(angle[1])),
+                       height * (1 - Math.cos(Math.toRadians(angle[1]))));
+            if (mLineChoice == LEFT) {
+                Core.line(img, p1, p2, new Scalar(Color.red(red), Color.blue(red), Color.green(red)), LINE_THICKNESS);
+                Core.line(img, p1, p3, new Scalar(Color.red(blue), Color.blue(blue), Color.green(blue)), LINE_THICKNESS);
+            } else {
+                Core.line(img, p1, p2, new Scalar(Color.red(blue), Color.blue(blue), Color.green(blue)), LINE_THICKNESS);
+                Core.line(img, p1, p3, new Scalar(Color.red(red), Color.blue(red), Color.green(red)), LINE_THICKNESS);
+            }
+        }
     }
 
-    private void addSelectedPoints(Mat img){
-        List<Point> pts = mAlgorithm.getSelectedPoints();
-        int blue = Color.BLUE;
-        Scalar sBlue = new Scalar(Color.red(blue),Color.blue(blue),Color.green(blue));
-        for (int i = 0;i < pts.size();i++){
-            Core.circle(img,pts.get(i),2,sBlue,POINT_THICKNESS);
+    private void addSelectedPoints(Mat img,boolean split){
+        int green = Color.GREEN;
+        int yellow = Color.YELLOW;
+        Scalar sGreen = new Scalar(Color.red(green),Color.green(green),Color.blue(green));
+        Scalar sYellow = new Scalar(Color.red(yellow),Color.green(yellow),Color.blue(yellow));
+
+        if (!split) {
+          List<Point> pts = mAlgorithm.getSelectedPoints().get(0);
+          for (int i = 0;i < pts.size();i++){
+              Core.circle(img,pts.get(i),2,sYellow,POINT_THICKNESS);
+          }
+        } else {
+          List<Point> ptsA = mAlgorithm.getSelectedPoints().get(0);
+          List<Point> ptsB = mAlgorithm.getSelectedPoints().get(1);
+
+          if (mLineChoice == LEFT) {
+              for (int i = 0; i < ptsA.size(); i++) {
+                  Core.circle(img, ptsA.get(i), 2, sYellow, POINT_THICKNESS);
+              }
+              for (int i = 0; i < ptsB.size(); i++) {
+                  Core.circle(img, ptsB.get(i), 2, sGreen, POINT_THICKNESS);
+              }
+          } else {
+              for (int i = 0; i < ptsA.size(); i++) {
+                  Core.circle(img, ptsA.get(i), 2, sGreen, POINT_THICKNESS);
+              }
+              for (int i = 0; i < ptsB.size(); i++) {
+                  Core.circle(img, ptsB.get(i), 2, sYellow, POINT_THICKNESS);
+              }
+          }
+
         }
     }
 
@@ -205,7 +257,7 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
 
     @Override
     public double getDriveAngle() {
-        return mAngle;
+        return mAngleFinal;
     }
 
     /*(This code contains error) */
@@ -250,13 +302,13 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         });
     }
 
-    private void updateStd(final double[] st){
+    private void updateStd(final double st){
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 TextView angle = (TextView) findViewById(R.id.std_test);
                 angle.setText(String.format(getString(R.string.std_front)
-                                             + "%.2f, " + "%.2f", st[0],st[1]));
+                                             + "%.2f.",st));
             }
         });
     }

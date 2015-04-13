@@ -24,6 +24,8 @@ public class Hanqis_activity extends Activity implements CameraBridgeViewBase.Cv
     // The hue value of opencv is [0,180)
     private double mThreshold = 0.0;
     private int mSamplingPoints = 2000;
+    private int mStdThreshold = 120000;
+    private int mDimension = 2;
 
 
     @Override
@@ -59,7 +61,7 @@ public class Hanqis_activity extends Activity implements CameraBridgeViewBase.Cv
 
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         Mat imgRgb = inputFrame.rgba();
-        double angle = algo.Sampling(imgRgb,mThreshold,mSamplingPoints);
+        double[] angle = algo.Sampling(imgRgb,mDimension,mThreshold,mSamplingPoints,mStdThreshold);
         return inputFrame.rgba();
     }
 
