@@ -260,11 +260,6 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         return mAngleFinal;
     }
 
-    /*(This code contains error) */
-    /* private void updateAngle(String s){
-        TextView angle = (TextView) findViewById(R.id.angle_test);
-        angle.setText(s);
-    }*/
     @Override
     public double getDriveSpeed() {
         return mSpeed;

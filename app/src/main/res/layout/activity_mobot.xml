@@ -55,7 +55,7 @@
             android:layout_height="wrap_content"
             android:id="@+id/speed_bar"
             android:max="30"
-            android:progress="20"
+            android:progress="0"
             style="@android:style/Widget.Holo.SeekBar"
             android:layout_weight="5"
             android:layout_margin="2dp"/>
