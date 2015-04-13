@@ -33,8 +33,8 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
     private static final String TAG = "MobotActivity";
     private static final int LINE_THICKNESS = 5;
     private static final int POINT_THICKNESS = 2;
-    private static final int LEFT = 0;
-    private static final int RIGHT = 1;
+    private static final int LEFT = 1;
+    private static final int RIGHT = 0;
     private SharedPreferences mSharedPref;
     private PortraitCameraView mOpenCvCameraView;
     private boolean mStatusConnected;
@@ -61,6 +61,7 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
     private int mDimension = 2;
     private int mCounter = 0;
     private int mTimeCounter = 0;
+    private int mNumHills = 0;
 
     private int[] TurnsL = new int[]{LEFT,RIGHT,LEFT,LEFT,RIGHT,RIGHT,LEFT,LEFT,RIGHT,RIGHT,LEFT,LEFT};
     private int[] TurnsR = new int[]{RIGHT,LEFT,RIGHT,RIGHT,LEFT,LEFT,RIGHT,RIGHT,LEFT,LEFT,RIGHT,RIGHT};
@@ -150,13 +151,16 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         mAngle = mAlgorithm.Sampling(img,mDimension,mThreshold,mSamplingPoints,mStdThreshold);
         mSplit = mAlgorithm.getSplit();
         if (mSplit) { mTimeCounter++;  }
-        int numHills = getNumHillPassed();
+        mNumHills = getNumHillPassed();
 
-        if (mSplit && numHills == 2 && mTimeCounter == 5) {
+        if (mSplit && mNumHills == 2 && mTimeCounter == 5) {
             mAngleFinal = mAngle[mLineChoice];
             mTimeCounter = 0;
+        } else if (mSplit && mNumHills == 1) {
+            mAngleFinal = mAngle[0];
+        } else {
+            mAngleFinal = mAngle[0];
         }
-        else {mAngleFinal = mAngle[0];}
 
 
         // Filtering
@@ -166,7 +170,7 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         //(Outdated) updateThreshold(0,0);
         updateAngle(mAngleFinal);
 
-        updateStd(mAlgorithm.getResStd());
+        updateStd(mAlgorithm.getResStd(),mNumHills);
 
         addSelectedPoints(img,mSplit);
         addFoundLine(img,mAngle,mSplit);
@@ -309,13 +313,13 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         });
     }
 
-    private void updateStd(final double st){
+    private void updateStd(final double st, final int hills){
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 TextView angle = (TextView) findViewById(R.id.std_test);
                 angle.setText(String.format(getString(R.string.std_front)
-                                             + "%.2f.",st));
+                                             + "%.2f. " +"Hills: %d",st,hills));
             }
         });
     }
