@@ -39,7 +39,8 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
     private PortraitCameraView mOpenCvCameraView;
     private boolean mStatusConnected;
 
-    // private EdgeDetection eAlgorithm = new EdgeDetection();
+    private MobotLooper mobotLooper;
+
     private Sample_algorithm mAlgorithm = new Sample_algorithm();
     private ParameterFiltering mFilt;
     private double[] mAngle = new double[2];
@@ -125,7 +126,8 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
     @Override
     protected IOIOLooper createIOIOLooper() {
         Log.i(TAG, "Created Looper");
-        return new MobotLooper(this, this);
+        mobotLooper = new MobotLooper(this,this);
+        return mobotLooper;
     }
 
     public void onCameraViewStarted(int width, int height) {
@@ -321,6 +323,15 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
                 msg.setText(m);
             }
         });
+    }
+
+    // hill detection
+    private int getNumHillPassed() {
+        return mobotLooper.numHillsPassed;
+    }
+
+    private boolean isOnHill() {
+        return mobotLooper.onHill;
     }
 
 }
