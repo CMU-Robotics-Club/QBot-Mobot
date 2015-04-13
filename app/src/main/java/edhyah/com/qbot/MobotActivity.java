@@ -144,8 +144,7 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
 
     //------------ Img Processing -------------------------------------------
 
-    @Override
-    public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+    @Override public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         Mat img = inputFrame.rgba();
         // mAngle = eAlgorithm.findAngle(img);
         mAngle = mAlgorithm.Sampling(img,mDimension,mThreshold,mSamplingPoints,mStdThreshold);
