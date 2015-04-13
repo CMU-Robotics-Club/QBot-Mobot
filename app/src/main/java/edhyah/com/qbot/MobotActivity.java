@@ -33,8 +33,8 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
     private static final String TAG = "MobotActivity";
     private static final int LINE_THICKNESS = 5;
     private static final int POINT_THICKNESS = 2;
-    private static final int LEFT = 1;
-    private static final int RIGHT = 0;
+    private static final int LEFT = 0;
+    private static final int RIGHT = 1;
     private SharedPreferences mSharedPref;
     private PortraitCameraView mOpenCvCameraView;
     private boolean mStatusConnected;
@@ -47,6 +47,7 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
     private int mLineChoice = 0;
     private double mAngleFinal = 0.0;
     private boolean mSplit = false;
+    private int mTurnRight = 0;
 
     private double mTunning = 0;
     private double mSpeed = 0;
@@ -58,7 +59,11 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
     private int mSamplingPoints = 2000;
     private int mStdThreshold = 25;
     private int mDimension = 2;
-    private int counter = 0;
+    private int mCounter = 0;
+    private int mTimeCounter = 0;
+
+    private int[] TurnsL = new int[]{LEFT,RIGHT,LEFT,LEFT,RIGHT,RIGHT,LEFT,LEFT,RIGHT,RIGHT,LEFT,LEFT};
+    private int[] TurnsR = new int[]{RIGHT,LEFT,RIGHT,RIGHT,LEFT,LEFT,RIGHT,RIGHT,LEFT,LEFT,RIGHT,RIGHT};
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -104,8 +109,9 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         Log.i(TAG, "Thresh " + mThreshold);
 
         mFilt = new ParameterFiltering(getP(), getI(), getD());
+        mStdThreshold = (int) mSharedPref.getFloat(MainActivity.PREF_STD_THRESHOLD,50);
         mDimension = (int) mSharedPref.getFloat(MainActivity.PREF_DIMENSION, 2);
-
+        mTurnRight = (int) mSharedPref.getFloat(MainActivity.PREF_TUNNING,0);
     }
 
     @Override
@@ -144,9 +150,14 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         // mAngle = eAlgorithm.findAngle(img);
         mAngle = mAlgorithm.Sampling(img,mDimension,mThreshold,mSamplingPoints,mStdThreshold);
         mSplit = mAlgorithm.getSplit();
+        if (mSplit) { mTimeCounter++;  }
+        int numHills = getNumHillPassed();
 
-        if (!mSplit) {mAngleFinal = mAngle[0];}
-        else {mAngleFinal = mAngle[mLineChoice];}
+        if (mSplit && numHills == 2 && mTimeCounter == 5) {
+            mAngleFinal = mAngle[mLineChoice];
+            mTimeCounter = 0;
+        }
+        else {mAngleFinal = mAngle[0];}
 
 
         // Filtering
