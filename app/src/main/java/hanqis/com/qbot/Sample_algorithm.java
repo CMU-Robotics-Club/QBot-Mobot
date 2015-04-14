@@ -41,7 +41,7 @@ public class Sample_algorithm {
     public double[] Sampling(Mat vidRgb,int dimension,double threshold,int sample,int stdThreshold) {
 
         double[] angleRes = new double[2];
-
+        Split = false;
         int vidHeight = vidRgb.height();
         int vidWidth = vidRgb.width();
         setAmount(sample);
