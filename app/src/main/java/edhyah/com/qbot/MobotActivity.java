@@ -115,6 +115,7 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         mDimension = (int) mSharedPref.getFloat(MainActivity.PREF_DIMENSION, 2);
         mTurnRight = (int) mSharedPref.getFloat(MainActivity.PREF_TUNNING,0);
         mTurn2 = mTurnRight == 1 ? Turns2R : Turns2L;
+        mSplitThreshold = (int) mSharedPref.getFloat(MainActivity.PREF_STD_SPLITTH,2);
     }
 
     @Override
@@ -154,7 +155,7 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         // store the previous value
         boolean splitPrev = mSplit;
         mSplit = mAlgorithm.getSplit();
-        int numHills = getNumHillPassed();
+        int numHills = 1;//getNumHillPassed();
 
         //mSplitTimeCounter needs to be at least 5 for the two lines to become available
         if (mSplit) {
