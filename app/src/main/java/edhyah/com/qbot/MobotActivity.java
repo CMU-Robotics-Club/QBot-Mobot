@@ -33,6 +33,7 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
     private static final int POINT_THICKNESS = 2;
     private static final int LEFT = 1;
     private static final int RIGHT = 0;
+    private static final int DEFUALT_ANGLE_PICK = 0;
     private SharedPreferences mSharedPref;
     private PortraitCameraView mOpenCvCameraView;
     private boolean mStatusConnected;
@@ -41,18 +42,17 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
     private Sample_algorithm mAlgorithm = new Sample_algorithm();
     private ParameterFiltering mFilt;
     private TurnDetector mTurnDetector = new TurnDetector();
+    private HillDetection mHillDetect;
 
-    private double[] mAngle = new double[2];
-    private int mLineChoice = RIGHT;
+    private double[] mAngles = new double[2];
     private double mAngleFinal = 0.0;
-    private boolean mSplit = false;
     private int mTurnRight = 0;
 
     private double mTunning = 0;
     private double mSpeed = 0;
     private double mMaxSpeed = MobotLooper.MAX_SPEED;
     private ParameterBar mTestBar;
-    
+
     /* need to be in [0,3) */
     private double mThreshold = 0.5;
     private int mSamplingPoints = 2000;
@@ -63,10 +63,9 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
     private int mSplitTimeCounter = 0;
     private int mSplitThreshold = 5;
 
-    private int[] Turns2L = new int[]{LEFT,RIGHT,LEFT,LEFT,RIGHT,RIGHT,LEFT,LEFT,RIGHT,RIGHT,LEFT,LEFT};
-    private int[] Turns2R = new int[]{RIGHT,LEFT,RIGHT,RIGHT,LEFT,LEFT,RIGHT,RIGHT,LEFT,LEFT,RIGHT,RIGHT};
-    private int[] mTurn1 = new int[]{RIGHT,LEFT,RIGHT,LEFT,RIGHT,LEFT,RIGHT,LEFT,RIGHT,LEFT,RIGHT,LEFT};
-    private int[] mTurn2 = Turns2L;
+    private int[] TURNS_2_LEFT = new int[]{LEFT,RIGHT,LEFT,LEFT,RIGHT,RIGHT,LEFT,LEFT,RIGHT,RIGHT,LEFT,LEFT};
+    private int[] TURNS_2_RIGHT = new int[]{RIGHT,LEFT,RIGHT,RIGHT,LEFT,LEFT,RIGHT,RIGHT,LEFT,LEFT,RIGHT,RIGHT};
+    private int[] mFinalTurns;
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -106,6 +105,9 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
         mOpenCvCameraView.setCvCameraViewListener(this);
 
+        // Hill Detection
+        mHillDetect = new HillDetection(this);
+
         addSpeedBar();
         mSharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         mThreshold = mSharedPref.getFloat(MainActivity.PREF_THRESHOLD, -1);
@@ -114,8 +116,8 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         mFilt = new ParameterFiltering(getP(), getI(), getD());
         mStdThreshold = (int) mSharedPref.getFloat(MainActivity.PREF_STD_THRESHOLD,50);
         mDimension = (int) mSharedPref.getFloat(MainActivity.PREF_DIMENSION, 2);
-        mTurnRight = (int) mSharedPref.getFloat(MainActivity.PREF_TUNNING,0);
-        mTurn2 = mTurnRight == 1 ? Turns2R : Turns2L;
+        int turningPatternChoice = (int) mSharedPref.getFloat(MainActivity.PREF_TUNNING,0);
+        mFinalTurns = (turningPatternChoice == 1) ? TURNS_2_RIGHT : TURNS_2_LEFT;
         mSplitThreshold = (int) mSharedPref.getFloat(MainActivity.PREF_STD_SPLITTH,2);
     }
 
@@ -151,68 +153,72 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
 
     @Override public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         Mat img = inputFrame.rgba();
-        // mAngle = eAlgorithm.findAngle(img);
-        mAngle = mAlgorithm.Sampling(img,mDimension,mThreshold,mSamplingPoints,mStdThreshold);
-        // store the previous value
-        boolean splitPrev = mSplit;
-        mSplit = mAlgorithm.getSplit();
-        int numHills = 1;//getNumHillPassed();
+        double[] angles = mAlgorithm.Sampling(img,mDimension,mThreshold,mSamplingPoints,mStdThreshold);
+        boolean split = mAlgorithm.getSplit();
+        int numHills = mHillDetect.getNumHillsPassed();
+        boolean onHill = mHillDetect.isOnHill();
+
+        // Update turn with prev angle
+        TurnDetector.Turn turn = mTurnDetector.updateTurn(mAngleFinal);
+
+        int lineChoice = pickAngle(split, numHills, turn);
+        double finalAngle = angles[lineChoice];
+
+        // On hill decision
+        if (onHill) {
+            finalAngle = mFilt.onHillFilter(finalAngle);
+        }
+
+        // Filtering
+        finalAngle = mFilt.filter(finalAngle);
+
+        // Update UI
+        updateAngle(finalAngle);
+        updateAlgParams(mAlgorithm.getResStd(), numHills, split, turn, onHill);
+
+        addSelectedPoints(img, split, lineChoice);
+        addFoundLines(img, finalAngle, angles, split, lineChoice);
+
+        // Save
+        mAngleFinal = finalAngle;
+        mAngles = angles;
+
+        return img;
+    }
+
+    private int pickAngle(boolean split, int numHills, TurnDetector.Turn turn) {
 
         //mSplitTimeCounter needs to be at least 5 for the two lines to become available
-        if (mSplit) {
+        if (split) {
             mSplitTimeCounter++;
         } else {
             //Reset mSplitTimeCounter when there is no two lines appear.
             mSplitTimeCounter = 0;
             //And be ready for the next turn.
-            if (splitPrev && !mSplit && numHills == 2) mCounter2++;
-            if (splitPrev && !mSplit && numHills == 1) mCounter1++;
+            if (!split && numHills == 2) mCounter2++;
+            if (!split && numHills == 1) mCounter1++;
         }
-        boolean splitAtHill1 = mSplit && numHills == 1 && mSplitTimeCounter >= mSplitThreshold;
-        boolean splitAtHill2 = mSplit && numHills == 2 && mSplitTimeCounter >= mSplitThreshold;
+        boolean splitAtHill1 = split && numHills == 1 && mSplitTimeCounter >= mSplitThreshold;
+        boolean splitAtHill2 = split && numHills == 2 && mSplitTimeCounter >= mSplitThreshold;
 
-        if (splitAtHill2) {
+        int lineCoice = DEFUALT_ANGLE_PICK;
+        if (splitAtHill2 && (mCounter2 < mFinalTurns.length)) {
             // Splits after hill 2, choice section
-            if (mCounter2 >= mTurn2.length) {
-                mLineChoice = mTurnRight;
-            } else {
-                mLineChoice = mTurn2[mCounter2];
-            }
-            mAngleFinal = mAngle[mLineChoice];
+            lineCoice = mFinalTurns[mCounter2];
         } else if (splitAtHill1) {
             // Splits after hill 1 for error correction
-            if (mCounter1 >= mTurn1.length)
-                mLineChoice = LEFT;
-            else {
-                mLineChoice = mTurn1[mCounter1];
+            if (turn == TurnDetector.Turn.LEFT)
+                lineCoice = LEFT;
+            else if (turn == TurnDetector.Turn.RIGHT) {
+                lineCoice = RIGHT;
             }
-            mAngleFinal = mAngle[mLineChoice];
-        } else {
-            // No split, only one line
-            mAngleFinal = mAngle[0];
         }
 
-        // Filtering
-        mAngleFinal = mFilt.filter(mAngleFinal);
-
-        // Detect turn
-        TurnDetector.Turn turn = mTurnDetector.updateTurn(mAngleFinal);
-
-        // Update UI
-        updateAngle(mAngleFinal);
-
-        if (numHills == 2) {
-            updateAlgParams(mAlgorithm.getResStd(), numHills, mCounter2, turn);
-        } else {
-            updateAlgParams(mAlgorithm.getResStd(), numHills, mCounter1, turn);
-        }
-
-        addSelectedPoints(img,(splitAtHill1 || splitAtHill2));
-        addFoundLines(img, mAngleFinal, mAngle, (splitAtHill1 || splitAtHill2));
-        return img;
+        return lineCoice;
     }
 
-    private void addFoundLines(Mat img, double angleFinal, double[] anglesFound, boolean split) {
+    private void addFoundLines(Mat img, double angleFinal, double[] anglesFound, boolean split,
+                               int lineChoice) {
         int height = img.height();
         int width = img.width();
         Point centerPt = new Point(width / 2, height);
@@ -224,7 +230,7 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         int green = Color.GREEN;
 
         // Display green is choice line
-        if (mLineChoice == RIGHT) {
+        if (lineChoice == RIGHT) {
             Core.line(img, centerPt, p1, new Scalar(Color.red(green), Color.blue(green), Color.green(green)), LINE_THICKNESS);
             Core.line(img, centerPt, p2, new Scalar(Color.red(blue), Color.blue(blue), Color.green(blue)), LINE_THICKNESS);
         } else {
@@ -241,7 +247,7 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
                 h - len*Math.cos(Math.toRadians(angle)));
     }
 
-    private void addSelectedPoints(Mat img, boolean split){
+    private void addSelectedPoints(Mat img, boolean split, int lineChoice){
         int green = Color.GREEN;
         int yellow = Color.YELLOW;
         Scalar sGreen = new Scalar(Color.red(green),Color.green(green),Color.blue(green));
@@ -256,7 +262,7 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
           List<Point> ptsA = mAlgorithm.getSelectedPoints().get(0);
           List<Point> ptsB = mAlgorithm.getSelectedPoints().get(1);
 
-          if (mLineChoice == RIGHT) {
+          if (lineChoice == RIGHT) {
               for (int i = 0; i < ptsA.size(); i++) {
                   Core.circle(img, ptsA.get(i), 2, sYellow, POINT_THICKNESS);
               }
@@ -354,13 +360,14 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         });
     }
 
-    private void updateAlgParams(final double st, final int hills, final int count,
-                                 final TurnDetector.Turn turn){
+    private void updateAlgParams(final double st, final int hills, final boolean split,
+                                 final TurnDetector.Turn turn, final boolean onHill){
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 TextView angle = (TextView) findViewById(R.id.std_test);
-                angle.setText(String.format("Std:%.2f. Hills:%d C:%d %s",st,hills,count,turn));
+                angle.setText(String.format("Std:%.2f. Hills:%d(%b) Split:%b Turn:%s",st,hills,
+                        split,turn,onHill));
             }
         });
     }
@@ -373,15 +380,6 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
                 msg.setText(m);
             }
         });
-    }
-
-    // hill detection
-    private int getNumHillPassed() {
-        return mobotLooper.numHillsPassed;
-    }
-
-    private boolean isOnHill() {
-        return mobotLooper.onHill;
     }
 
 }

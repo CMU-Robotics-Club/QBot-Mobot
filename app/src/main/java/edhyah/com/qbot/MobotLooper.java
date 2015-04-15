@@ -42,15 +42,9 @@ class MobotLooper extends BaseIOIOLooper {
     private DigitalOutput mStatusLed;
     private int mLedToggleCounter = LED_TOGGLE_DELAY;
 
-    // Hill detection
-    public boolean onHill = false;
-    public int numHillsPassed = 0;
-    private HillDetection mHillDetect;
-
     public MobotLooper(Context context, MobotDriver mobotDriver) {
         mContext = context;
         mMobotDriver = mobotDriver;
-        mHillDetect = new HillDetection(mContext);
     }
 
     @Override
@@ -70,8 +64,6 @@ class MobotLooper extends BaseIOIOLooper {
             driveMobot();
             toggleStatusLed();
             mMobotDriver.setStatusOnline(true);
-            onHill = mHillDetect.isOnHill();
-            numHillsPassed = mHillDetect.getNumHillsPassed();
         } catch (ConnectionLostException e) {
             Log.e(TAG, e.getMessage());
             mMobotDriver.setStatusOnline(false);
