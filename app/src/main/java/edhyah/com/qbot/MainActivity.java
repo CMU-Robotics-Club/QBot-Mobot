@@ -49,7 +49,7 @@ public class MainActivity extends Activity {
         layout.addView(stdThreshBar);
         ParameterBar turnBar = new ParameterBar(this,"Turn",PREF_STD_TURN,1,0.0,1.0,0.0);
         layout.addView(turnBar);
-        ParameterBar SplitThBar = new ParameterBar(this,"Turn",PREF_STD_SPLITTH,4,1.0,5.0,1.0);
+        ParameterBar SplitThBar = new ParameterBar(this,"SplitTh",PREF_STD_SPLITTH,4,1.0,5.0,2.0);
         layout.addView(SplitThBar);
     }
 

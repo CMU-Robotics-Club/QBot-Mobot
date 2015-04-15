@@ -38,9 +38,10 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
     private boolean mStatusConnected;
 
     private MobotLooper mobotLooper;
-
     private Sample_algorithm mAlgorithm = new Sample_algorithm();
     private ParameterFiltering mFilt;
+    private TurnDetector mTurnDetector = new TurnDetector();
+
     private double[] mAngle = new double[2];
     private int mLineChoice = RIGHT;
     private double mAngleFinal = 0.0;
@@ -194,17 +195,20 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         // Filtering
         mAngleFinal = mFilt.filter(mAngleFinal);
 
+        // Detect turn
+        TurnDetector.Turn turn = mTurnDetector.updateTurn(mAngleFinal);
+
         // Update UI
         updateAngle(mAngleFinal);
 
         if (numHills == 2) {
-            updateAlgParams(mAlgorithm.getResStd(), numHills, mCounter2);
+            updateAlgParams(mAlgorithm.getResStd(), numHills, mCounter2, turn);
         } else {
-            updateAlgParams(mAlgorithm.getResStd(), numHills, mCounter1);
+            updateAlgParams(mAlgorithm.getResStd(), numHills, mCounter1, turn);
         }
 
         addSelectedPoints(img,(splitAtHill1 || splitAtHill2));
-        addFoundLines(img,mAngleFinal, mAngle,(splitAtHill1 || splitAtHill2));
+        addFoundLines(img, mAngleFinal, mAngle, (splitAtHill1 || splitAtHill2));
         return img;
     }
 
@@ -345,18 +349,18 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
             @Override
             public void run() {
                 TextView angle = (TextView) findViewById(R.id.angle_test);
-                angle.setText(String.format(getString(R.string.angle_front) + "%.2f  ", a));
+                angle.setText(String.format("Angle: %.2f", a));
             }
         });
     }
 
-    private void updateAlgParams(final double st, final int hills, final int count){
+    private void updateAlgParams(final double st, final int hills, final int count,
+                                 final TurnDetector.Turn turn){
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 TextView angle = (TextView) findViewById(R.id.std_test);
-                angle.setText(String.format(getString(R.string.std_front)
-                                             + "%.2f. " +"Hills: %d. C: %d",st,hills,count));
+                angle.setText(String.format("Std:%.2f. Hills:%d C:%d %s",st,hills,count,turn));
             }
         });
     }
