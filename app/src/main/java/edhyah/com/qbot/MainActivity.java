@@ -44,7 +44,7 @@ public class MainActivity extends Activity {
         layout.addView(pidDBar);
         ParameterBar dimensionBar = new ParameterBar(this, "RD",PREF_DIMENSION,4,1.0,5.0,2.0);
         layout.addView(dimensionBar);
-        ParameterBar stdThreshBar = new ParameterBar(this,"SdTh",PREF_STD_THRESHOLD,100,0.0,100.0,25.0);
+        ParameterBar stdThreshBar = new ParameterBar(this,"SdTh",PREF_STD_THRESHOLD,100,0.0,100.0,28.0);
         layout.addView(stdThreshBar);
         ParameterBar turnBar = new ParameterBar(this,"Turn",PREF_STD_TURN,1,0.0,1.0,0.0);
         layout.addView(turnBar);
