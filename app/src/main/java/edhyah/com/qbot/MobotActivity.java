@@ -59,13 +59,15 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
     private int mSamplingPoints = 2000;
     private int mStdThreshold = 25;
     private int mDimension = 2;
-    private int mCounter = 0;
+    private int mCounter1 = 0;
+    private int mCounter2 = 0;
     private int mTimeCounter = 0;
     private int mSplitThreshold = 5;
 
-    private int[] TurnsL = new int[]{LEFT,RIGHT,LEFT,LEFT,RIGHT,RIGHT,LEFT,LEFT,RIGHT,RIGHT,LEFT,LEFT};
-    private int[] TurnsR = new int[]{RIGHT,LEFT,RIGHT,RIGHT,LEFT,LEFT,RIGHT,RIGHT,LEFT,LEFT,RIGHT,RIGHT};
-    private int[] mTurn = TurnsL;
+    private int[] Turns2L = new int[]{LEFT,RIGHT,LEFT,LEFT,RIGHT,RIGHT,LEFT,LEFT,RIGHT,RIGHT,LEFT,LEFT};
+    private int[] Turns2R = new int[]{RIGHT,LEFT,RIGHT,RIGHT,LEFT,LEFT,RIGHT,RIGHT,LEFT,LEFT,RIGHT,RIGHT};
+    private int[] mTurn1 = new int[]{RIGHT,LEFT,RIGHT,LEFT,RIGHT,LEFT,RIGHT,LEFT,RIGHT,LEFT,RIGHT,LEFT};
+    private int[] mTurn2 = Turns2L;
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -114,7 +116,7 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         mStdThreshold = (int) mSharedPref.getFloat(MainActivity.PREF_STD_THRESHOLD,50);
         mDimension = (int) mSharedPref.getFloat(MainActivity.PREF_DIMENSION, 2);
         mTurnRight = (int) mSharedPref.getFloat(MainActivity.PREF_TUNNING,0);
-        mTurn = mTurnRight == 1 ? TurnsR : TurnsL;
+        mTurn2 = mTurnRight == 1 ? Turns2R : Turns2L;
     }
 
     @Override
@@ -163,23 +165,26 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
             //Reset mTimeCounter when there is no two lines appear.
             mTimeCounter = 0;
             //And be ready for the next turn.
-            if (splitPrev && !mSplit) mCounter++;
+            if (splitPrev && !mSplit && numHills == 2) mCounter2++;
         }
-        boolean splitAtHill1 = mSplit && numHills == 1;
+        boolean splitAtHill1 = mSplit && numHills == 1 && mTimeCounter >= mSplitThreshold;
         boolean splitAtHill2 = mSplit && numHills == 2 && mTimeCounter >= mSplitThreshold;
 
 
         if (splitAtHill2) {
-            if (mCounter >= mTurn.length) {
-                mLineChoice = LEFT;
+            if (mCounter2 >= mTurn2.length) {
+                mLineChoice = mTurnRight;
             } else {
-                mLineChoice = mTurn[mCounter];
+                mLineChoice = mTurn2[mCounter2];
             }
             mAngleFinal = mAngle[mLineChoice];
         } else if (splitAtHill1) {
-            // Do something here to replace the value mAngleFinal.
-            // set mLineChoice = LEFT or RIGHT
-            mAngleFinal = mAngle[0];
+            if (mCounter1 >= mTurn1.length)
+                mLineChoice = LEFT;
+            else {
+                mLineChoice = mTurn1[mCounter1];
+            }
+            mAngleFinal = mAngle[mLineChoice];
         } else {
             mAngleFinal = mAngle[0];
         }
@@ -192,7 +197,11 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         //(Outdated) updateThreshold(0,0);
         updateAngle(mAngleFinal);
 
-        updateStd(mAlgorithm.getResStd(),numHills,mCounter);
+        if (numHills == 2) {
+            updateStd(mAlgorithm.getResStd(),numHills,mCounter2);
+        } else {
+            updateStd(mAlgorithm.getResStd(),numHills,mCounter1);
+        }
 
         addSelectedPoints(img,(splitAtHill1 || splitAtHill2));
         addFoundLine(img,mAngle,(splitAtHill1 || splitAtHill2));
