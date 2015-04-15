@@ -19,21 +19,25 @@ public class HillDetection implements SensorEventListener {
     private SensorManager senSensorManager;
     private Sensor senAccelerometer;
     private static final int NUM_AVG_VALS = 10;
-    private static final int UPDATE_DELAY_MS = 100;
-    private static final float HILL_THRESHOLD = (float)6.5;
+    private static final int UPDATE_DELAY_MS = 10;
+    private static final int DELAY_UNTIL_NEXT_HILL = 20*1000;
+    private float mHillThreshold = (float)6.5;
     private float[] mPastVals;
     private int mPastValsInd = 0;
     private boolean onHill = false;
     private int numHillsPassed = 0;
     private long lastUpdate = 0;
+    private long timeOfLastHill = -DELAY_UNTIL_NEXT_HILL;
 
-    public HillDetection(Context mContext) {
+    public HillDetection(Context mContext, float hillThresh) {
         senSensorManager = (SensorManager) mContext.getSystemService(Context.SENSOR_SERVICE);
         senAccelerometer = senSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         senSensorManager.registerListener(this, senAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+
+        mHillThreshold = hillThresh;
         mPastVals = new float[NUM_AVG_VALS];
         for (int i = 0; i < mPastVals.length; i++) {
-            mPastVals[i] = HILL_THRESHOLD;
+            mPastVals[i] = mHillThreshold;
         }
     }
 
@@ -41,18 +45,23 @@ public class HillDetection implements SensorEventListener {
     public void onSensorChanged(SensorEvent sensorEvent) {
         Sensor mySensor = sensorEvent.sensor;
         if (mySensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            float y = getAvg(sensorEvent.values[1]);
 
             long curTime = System.currentTimeMillis();
+            long timeDiff = curTime - lastUpdate;
 
-            if ((curTime - lastUpdate) > UPDATE_DELAY_MS) {
+            if (timeDiff > UPDATE_DELAY_MS) {
+                float y = getAvg(sensorEvent.values[1]);
                 lastUpdate = curTime;
 
-                if (!onHill && y < HILL_THRESHOLD) {
+                if (y < mHillThreshold) {
                     onHill = true;
-                } else if (onHill && y > HILL_THRESHOLD) {
+                } else {
+                    // Update count if was on hill before and time since last hill is large enough
+                    if (onHill && ((curTime - timeOfLastHill) > DELAY_UNTIL_NEXT_HILL)) {
+                        timeOfLastHill = curTime;
+                        numHillsPassed++;
+                    }
                     onHill = false;
-                    numHillsPassed++;
                 }
 
                 Log.i(TAG, Arrays.toString(sensorEvent.values) + " " + onHill);

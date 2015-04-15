@@ -22,6 +22,7 @@ public class MainActivity extends Activity {
     public static final String PREF_STD_THRESHOLD = "edhyah.com.qbot.pref.STD_THRESHOLD";
     public static final String PREF_STD_TURN = "edhyah.com.qbot.pref.STD_TURN";
     public static final String PREF_STD_SPLITTH = "eddyah.com.qbot.pref.SPLITTH";
+    public static final String PREF_HILL_THRESH= "eddyah.com.qbot.pref.HILL_THRESH";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +52,7 @@ public class MainActivity extends Activity {
         layout.addView(turnBar);
         ParameterBar SplitThBar = new ParameterBar(this,"SptTh",PREF_STD_SPLITTH,4,1.0,5.0,2.0);
         layout.addView(SplitThBar);
+        layout.addView(new ParameterBar(this,"HlTh",PREF_HILL_THRESH,100,0.0,10.0,6.5));
     }
 
 

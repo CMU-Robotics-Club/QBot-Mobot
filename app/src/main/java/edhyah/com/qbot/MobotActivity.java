@@ -105,9 +105,6 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
         mOpenCvCameraView.setCvCameraViewListener(this);
 
-        // Hill Detection
-        mHillDetect = new HillDetection(this);
-
         addSpeedBar();
         mSharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         mThreshold = mSharedPref.getFloat(MainActivity.PREF_THRESHOLD, -1);
@@ -119,6 +116,10 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         int turningPatternChoice = (int) mSharedPref.getFloat(MainActivity.PREF_TUNNING,0);
         mFinalTurns = (turningPatternChoice == 1) ? TURNS_2_RIGHT : TURNS_2_LEFT;
         mSplitThreshold = (int) mSharedPref.getFloat(MainActivity.PREF_STD_SPLITTH,2);
+
+        // Hill Detection
+        float hillThresh = mSharedPref.getFloat(MainActivity.PREF_HILL_THRESH,0);
+        mHillDetect = new HillDetection(this, hillThresh);
     }
 
     @Override
