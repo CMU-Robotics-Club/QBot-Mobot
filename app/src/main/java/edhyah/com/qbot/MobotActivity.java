@@ -366,10 +366,14 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
             @Override
             public void run() {
                 TextView angle = (TextView) findViewById(R.id.std_test);
-                angle.setText(String.format("Std:%.2f. Hills:%d(%b) Split:%b Turn:%s",st,hills,
-                        split,turn,onHill));
+                angle.setText(String.format("Std:%.0f Hills:%d(%s) Split:%s Turn:%s",st,hills,
+                        bool2Str(onHill),bool2Str(split),turn));
             }
         });
+    }
+
+    private String bool2Str(boolean b) {
+        return b ? "T" : "F";
     }
 
     private void updateMsg(final String m) {
