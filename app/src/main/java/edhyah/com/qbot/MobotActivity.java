@@ -44,9 +44,10 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
     private Sample_algorithm mAlgorithm = new Sample_algorithm();
     private ParameterFiltering mFilt;
     private double[] mAngle = new double[2];
-    private int mLineChoice = 0;
+    private int mLineChoice = RIGHT;
     private double mAngleFinal = 0.0;
     private boolean mSplit = false;
+    private int mTurnRight = 0;
 
     private double mTunning = 0;
     private double mSpeed = 0;
@@ -58,7 +59,15 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
     private int mSamplingPoints = 2000;
     private int mStdThreshold = 25;
     private int mDimension = 2;
-    private int counter = 0;
+    private int mCounter1 = 0;
+    private int mCounter2 = 0;
+    private int mTimeCounter = 0;
+    private int mSplitThreshold = 5;
+
+    private int[] Turns2L = new int[]{LEFT,RIGHT,LEFT,LEFT,RIGHT,RIGHT,LEFT,LEFT,RIGHT,RIGHT,LEFT,LEFT};
+    private int[] Turns2R = new int[]{RIGHT,LEFT,RIGHT,RIGHT,LEFT,LEFT,RIGHT,RIGHT,LEFT,LEFT,RIGHT,RIGHT};
+    private int[] mTurn1 = new int[]{RIGHT,LEFT,RIGHT,LEFT,RIGHT,LEFT,RIGHT,LEFT,RIGHT,LEFT,RIGHT,LEFT};
+    private int[] mTurn2 = Turns2L;
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -104,8 +113,10 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         Log.i(TAG, "Thresh " + mThreshold);
 
         mFilt = new ParameterFiltering(getP(), getI(), getD());
+        mStdThreshold = (int) mSharedPref.getFloat(MainActivity.PREF_STD_THRESHOLD,50);
         mDimension = (int) mSharedPref.getFloat(MainActivity.PREF_DIMENSION, 2);
-
+        mTurnRight = (int) mSharedPref.getFloat(MainActivity.PREF_TUNNING,0);
+        mTurn2 = mTurnRight == 1 ? Turns2R : Turns2L;
     }
 
     @Override
@@ -138,15 +149,45 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
 
     //------------ Img Processing -------------------------------------------
 
-    @Override
-    public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+    @Override public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         Mat img = inputFrame.rgba();
         // mAngle = eAlgorithm.findAngle(img);
         mAngle = mAlgorithm.Sampling(img,mDimension,mThreshold,mSamplingPoints,mStdThreshold);
+        // store the previous value
+        boolean splitPrev = mSplit;
         mSplit = mAlgorithm.getSplit();
+        int numHills = getNumHillPassed();
 
-        if (!mSplit) {mAngleFinal = mAngle[0];}
-        else {mAngleFinal = mAngle[mLineChoice];}
+        //mTimeCounter needs to be at least 5 for the two lines to become available
+        if (mSplit) {
+            mTimeCounter++;
+        } else {
+            //Reset mTimeCounter when there is no two lines appear.
+            mTimeCounter = 0;
+            //And be ready for the next turn.
+            if (splitPrev && !mSplit && numHills == 2) mCounter2++;
+        }
+        boolean splitAtHill1 = mSplit && numHills == 1 && mTimeCounter >= mSplitThreshold;
+        boolean splitAtHill2 = mSplit && numHills == 2 && mTimeCounter >= mSplitThreshold;
+
+
+        if (splitAtHill2) {
+            if (mCounter2 >= mTurn2.length) {
+                mLineChoice = mTurnRight;
+            } else {
+                mLineChoice = mTurn2[mCounter2];
+            }
+            mAngleFinal = mAngle[mLineChoice];
+        } else if (splitAtHill1) {
+            if (mCounter1 >= mTurn1.length)
+                mLineChoice = LEFT;
+            else {
+                mLineChoice = mTurn1[mCounter1];
+            }
+            mAngleFinal = mAngle[mLineChoice];
+        } else {
+            mAngleFinal = mAngle[0];
+        }
 
 
         // Filtering
@@ -156,10 +197,14 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         //(Outdated) updateThreshold(0,0);
         updateAngle(mAngleFinal);
 
-        updateStd(mAlgorithm.getResStd());
+        if (numHills == 2) {
+            updateStd(mAlgorithm.getResStd(),numHills,mCounter2);
+        } else {
+            updateStd(mAlgorithm.getResStd(),numHills,mCounter1);
+        }
 
-        addSelectedPoints(img,mSplit);
-        addFoundLine(img,mAngle,mSplit);
+        addSelectedPoints(img,(splitAtHill1 || splitAtHill2));
+        addFoundLine(img,mAngle,(splitAtHill1 || splitAtHill2));
         return img;
     }
 
@@ -176,7 +221,7 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         } else {
             Point p3 = new Point(width / 2 + height * Math.sin(Math.toRadians(angle[1])),
                        height * (1 - Math.cos(Math.toRadians(angle[1]))));
-            if (mLineChoice == LEFT) {
+            if (mLineChoice == RIGHT) {
                 Core.line(img, p1, p2, new Scalar(Color.red(red), Color.blue(red), Color.green(red)), LINE_THICKNESS);
                 Core.line(img, p1, p3, new Scalar(Color.red(blue), Color.blue(blue), Color.green(blue)), LINE_THICKNESS);
             } else {
@@ -201,7 +246,7 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
           List<Point> ptsA = mAlgorithm.getSelectedPoints().get(0);
           List<Point> ptsB = mAlgorithm.getSelectedPoints().get(1);
 
-          if (mLineChoice == LEFT) {
+          if (mLineChoice == RIGHT) {
               for (int i = 0; i < ptsA.size(); i++) {
                   Core.circle(img, ptsA.get(i), 2, sYellow, POINT_THICKNESS);
               }
@@ -299,13 +344,13 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         });
     }
 
-    private void updateStd(final double st){
+    private void updateStd(final double st, final int hills, final int count){
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 TextView angle = (TextView) findViewById(R.id.std_test);
                 angle.setText(String.format(getString(R.string.std_front)
-                                             + "%.2f.",st));
+                                             + "%.2f. " +"Hills: %d. C: %d",st,hills,count));
             }
         });
     }
