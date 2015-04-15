@@ -11,7 +11,7 @@ public class ParameterFiltering {
     private double PID_P = 1;
     private double PID_I = 0;
     private double PID_D = 0;
-    private static final double[] LP_FLT = {.2, .1, .1, .1, .1, .1, .1};
+    private static final double[] LP_FLT = {.5, .3, .1, .1};
     private static final double TARGET_VAL = 0;
     private static final String TAG = "ParameterFiltering";
     private List<Double> mPastVals;
