@@ -1,6 +1,5 @@
 package edhyah.com.qbot;
 
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -8,7 +7,6 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.SurfaceView;
 import android.view.WindowManager;
-import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -61,7 +59,7 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
     private int mDimension = 2;
     private int mCounter1 = 0;
     private int mCounter2 = 0;
-    private int mTimeCounter = 0;
+    private int mSplitTimeCounter = 0;
     private int mSplitThreshold = 5;
 
     private int[] Turns2L = new int[]{LEFT,RIGHT,LEFT,LEFT,RIGHT,RIGHT,LEFT,LEFT,RIGHT,RIGHT,LEFT,LEFT};
@@ -158,20 +156,21 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         mSplit = mAlgorithm.getSplit();
         int numHills = getNumHillPassed();
 
-        //mTimeCounter needs to be at least 5 for the two lines to become available
+        //mSplitTimeCounter needs to be at least 5 for the two lines to become available
         if (mSplit) {
-            mTimeCounter++;
+            mSplitTimeCounter++;
         } else {
-            //Reset mTimeCounter when there is no two lines appear.
-            mTimeCounter = 0;
+            //Reset mSplitTimeCounter when there is no two lines appear.
+            mSplitTimeCounter = 0;
             //And be ready for the next turn.
             if (splitPrev && !mSplit && numHills == 2) mCounter2++;
+            if (splitPrev && !mSplit && numHills == 1) mCounter1++;
         }
-        boolean splitAtHill1 = mSplit && numHills == 1 && mTimeCounter >= mSplitThreshold;
-        boolean splitAtHill2 = mSplit && numHills == 2 && mTimeCounter >= mSplitThreshold;
-
+        boolean splitAtHill1 = mSplit && numHills == 1 && mSplitTimeCounter >= mSplitThreshold;
+        boolean splitAtHill2 = mSplit && numHills == 2 && mSplitTimeCounter >= mSplitThreshold;
 
         if (splitAtHill2) {
+            // Splits after hill 2, choice section
             if (mCounter2 >= mTurn2.length) {
                 mLineChoice = mTurnRight;
             } else {
@@ -179,6 +178,7 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
             }
             mAngleFinal = mAngle[mLineChoice];
         } else if (splitAtHill1) {
+            // Splits after hill 1 for error correction
             if (mCounter1 >= mTurn1.length)
                 mLineChoice = LEFT;
             else {
@@ -186,52 +186,57 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
             }
             mAngleFinal = mAngle[mLineChoice];
         } else {
+            // No split, only one line
             mAngleFinal = mAngle[0];
         }
-
 
         // Filtering
         mAngleFinal = mFilt.filter(mAngleFinal);
 
-        //(Outdated) Threshold value will show at the end threshold bar.
-        //(Outdated) updateThreshold(0,0);
+        // Update UI
         updateAngle(mAngleFinal);
 
         if (numHills == 2) {
-            updateStd(mAlgorithm.getResStd(),numHills,mCounter2);
+            updateAlgParams(mAlgorithm.getResStd(), numHills, mCounter2);
         } else {
-            updateStd(mAlgorithm.getResStd(),numHills,mCounter1);
+            updateAlgParams(mAlgorithm.getResStd(), numHills, mCounter1);
         }
 
         addSelectedPoints(img,(splitAtHill1 || splitAtHill2));
-        addFoundLine(img,mAngle,(splitAtHill1 || splitAtHill2));
+        addFoundLines(img,mAngleFinal, mAngle,(splitAtHill1 || splitAtHill2));
         return img;
     }
 
-    private void addFoundLine(Mat img, double[] angle, boolean split) {
+    private void addFoundLines(Mat img, double angleFinal, double[] anglesFound, boolean split) {
         int height = img.height();
         int width = img.width();
-        Point p1 = new Point(width / 2, height);
-        Point p2 = new Point(width / 2 + height * Math.sin(Math.toRadians(angle[0])),
-                       height * (1 - Math.cos(Math.toRadians(angle[0]))));
+        Point centerPt = new Point(width / 2, height);
+        Point p0 = getEndPoint(angleFinal,width, height, height);
+        Point p1 = getEndPoint(anglesFound[0],width, height, height/3);
+        Point p2 = getEndPoint(anglesFound[1],width, height, height/3);
         int red = Color.RED;
         int blue = Color.CYAN;
-        if (!split) {
-            Core.line(img, p1, p2, new Scalar(Color.red(red), Color.blue(red), Color.green(red)), LINE_THICKNESS);
+        int green = Color.GREEN;
+
+        // Display green is choice line
+        if (mLineChoice == RIGHT) {
+            Core.line(img, centerPt, p1, new Scalar(Color.red(green), Color.blue(green), Color.green(green)), LINE_THICKNESS);
+            Core.line(img, centerPt, p2, new Scalar(Color.red(blue), Color.blue(blue), Color.green(blue)), LINE_THICKNESS);
         } else {
-            Point p3 = new Point(width / 2 + height * Math.sin(Math.toRadians(angle[1])),
-                       height * (1 - Math.cos(Math.toRadians(angle[1]))));
-            if (mLineChoice == RIGHT) {
-                Core.line(img, p1, p2, new Scalar(Color.red(red), Color.blue(red), Color.green(red)), LINE_THICKNESS);
-                Core.line(img, p1, p3, new Scalar(Color.red(blue), Color.blue(blue), Color.green(blue)), LINE_THICKNESS);
-            } else {
-                Core.line(img, p1, p2, new Scalar(Color.red(blue), Color.blue(blue), Color.green(blue)), LINE_THICKNESS);
-                Core.line(img, p1, p3, new Scalar(Color.red(red), Color.blue(red), Color.green(red)), LINE_THICKNESS);
-            }
+            Core.line(img, centerPt, p2, new Scalar(Color.red(green), Color.blue(green), Color.green(green)), LINE_THICKNESS);
+            Core.line(img, centerPt, p1, new Scalar(Color.red(blue), Color.blue(blue), Color.green(blue)), LINE_THICKNESS);
         }
+
+        // Display filtered angle line
+        Core.line(img, centerPt, p0, new Scalar(Color.red(red), Color.blue(red), Color.green(red)), LINE_THICKNESS);
     }
 
-    private void addSelectedPoints(Mat img,boolean split){
+    private Point getEndPoint(double angle, int w, int h, int len) {
+        return new Point(w / 2 + len * Math.sin(Math.toRadians(angle)),
+                h - len*Math.cos(Math.toRadians(angle)));
+    }
+
+    private void addSelectedPoints(Mat img, boolean split){
         int green = Color.GREEN;
         int yellow = Color.YELLOW;
         Scalar sGreen = new Scalar(Color.red(green),Color.green(green),Color.blue(green));
@@ -344,7 +349,7 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         });
     }
 
-    private void updateStd(final double st, final int hills, final int count){
+    private void updateAlgParams(final double st, final int hills, final int count){
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
