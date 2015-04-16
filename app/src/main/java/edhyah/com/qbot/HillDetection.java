@@ -18,7 +18,8 @@ public class HillDetection implements SensorEventListener {
     private static final String TAG = "HillDetection";
     private SensorManager senSensorManager;
     private Sensor senAccelerometer;
-    private static final int NUM_AVG_VALS = 7;
+    private static final int NUM_SMOOTH_TERM = 3;
+    private static final int NUM_AVG_VALS = 10;
     private static final int UPDATE_DELAY_MS = 10;
     private static final int DELAY_UNTIL_NEXT_HILL = 20*1000;
     private static final int COUNTS_ON_HILL = 20;
@@ -52,21 +53,28 @@ public class HillDetection implements SensorEventListener {
             long timeDiff = curTime - lastUpdate;
 
             if (timeDiff > UPDATE_DELAY_MS) {
-                float y = getAvg(sensorEvent.values[1]);
+                float y = sensorEvent.values[1];
+                addVal(y);
+                float shortAvgY = getAvg(NUM_SMOOTH_TERM);
+                float avgY = getAvg();
                 lastUpdate = curTime;
 
-                if (y < mHillThreshold) {
+                if (shortAvgY < mHillThreshold) {
                     onHill = true;
+                } else {
+                    onHill = false;
+                }
+
+                if (avgY < mHillThreshold) {
                     mCountsOnHill++;
                 } else {
                     // Update count if was on hill before and time since last hill is large enough
-                    if (onHill && ((curTime - timeOfLastHill) > DELAY_UNTIL_NEXT_HILL) &&
+                    if (((curTime - timeOfLastHill) > DELAY_UNTIL_NEXT_HILL) &&
                             (mCountsOnHill > COUNTS_ON_HILL)) {
                         timeOfLastHill = curTime;
                         numHillsPassed++;
                     }
                     mCountsOnHill = 0;
-                    onHill = false;
                 }
 
                 Log.i(TAG, Arrays.toString(sensorEvent.values) + "(" + y + ")\t" + onHill + "\t"
@@ -75,15 +83,23 @@ public class HillDetection implements SensorEventListener {
         }
     }
 
-    private float getAvg(float val) {
-        mPastVals[mPastValsInd] = val;
+    private void addVal(float val) {
         mPastValsInd = (mPastValsInd+1) % mPastVals.length;
+        mPastVals[mPastValsInd] = val;
+    }
+
+    private float getAvg() {
+        return getAvg(mPastVals.length);
+    }
+
+    private float getAvg(int terms) {
 
         float avg = 0;
-        for(int i = 0; i < mPastVals.length; i++) {
-            avg += mPastVals[i];
+        int len = Math.min(terms, mPastVals.length);
+        for(int i = 0; i < len; i++) {
+            avg += mPastVals[Math.abs(mPastValsInd - i) % mPastVals.length];
         }
-        return avg / mPastVals.length;
+        return avg / len;
     }
 
     @Override

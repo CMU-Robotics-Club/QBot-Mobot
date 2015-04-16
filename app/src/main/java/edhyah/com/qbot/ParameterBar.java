@@ -100,11 +100,16 @@ public class ParameterBar extends LinearLayout {
     }
 
     private double load() {
-        return mSharedPref.getFloat(mPrefKey, (float)mDefaultVal);
+        double val = mSharedPref.getFloat(mPrefKey, (float)mDefaultVal);
+        return val;
     }
 
     private void save(int progress) {
-        mCurVal = barProgressToVal(progress);
+        save(barProgressToVal(progress));
+    }
+
+    private void save(double val) {
+        mCurVal = val;
         SharedPreferences.Editor editor = mSharedPref.edit();
         editor.putFloat(mPrefKey, (float)mCurVal);
         boolean success = editor.commit();

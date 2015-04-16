@@ -2,7 +2,9 @@ package edhyah.com.qbot;
 
 import android.content.Intent;
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -32,7 +34,7 @@ public class MainActivity extends Activity {
         LinearLayout layout = (LinearLayout) findViewById(R.id.main_main);
 
         // Add Bars
-        ParameterBar maxSpeedBar = new ParameterBar(this, "MS", PREF_MAX_SPEED, 30, 0.0, 30.0, 9.0);
+        ParameterBar maxSpeedBar = new ParameterBar(this, "MS", PREF_MAX_SPEED, 30, 0.0, 30.0, 8.0);
         layout.addView(maxSpeedBar);
         ParameterBar tuneBar = new ParameterBar(this, "Tn", PREF_TUNNING, 200, -1.0, 1.0, 0.0);
         layout.addView(tuneBar);
@@ -52,7 +54,8 @@ public class MainActivity extends Activity {
         layout.addView(turnBar);
         ParameterBar SplitThBar = new ParameterBar(this,"SptTh",PREF_STD_SPLITTH,4,1.0,5.0,2.0);
         layout.addView(SplitThBar);
-        layout.addView(new ParameterBar(this,"HlTh",PREF_HILL_THRESH,100,0.0,10.0,6.8));
+        layout.addView(new ParameterBar(this,"HlTh",PREF_HILL_THRESH,100,0.0,10.0,7));
+
     }
 
 
@@ -82,4 +85,5 @@ public class MainActivity extends Activity {
         Intent intent = new Intent(this, MobotActivity.class);
         startActivity(intent);
     }
+
 }
