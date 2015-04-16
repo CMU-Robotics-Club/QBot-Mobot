@@ -34,7 +34,7 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
     private static final int LEFT = 1;
     private static final int RIGHT = 0;
     private static final int DEFUALT_ANGLE_PICK = 0;
-    private static final int ANGLE_SHARP = 25;
+    private static final int ANGLE_SHARP = 8;
     private SharedPreferences mSharedPref;
     private PortraitCameraView mOpenCvCameraView;
     private boolean mStatusConnected;
@@ -50,6 +50,7 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
     private int mTurnRight = 0;
     private boolean mMadeDecision = false;
     private boolean mLineIgnore = false;
+    private int mHill2Decision = LEFT;
 
     private double mTunning = 0;
     private double mSpeed = 0;
@@ -211,21 +212,24 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         }
         boolean splitAtHill1 = split && numHills == 1 && mSplitTimeCounter >= mSplitThreshold;
         boolean splitAtHill2 = split && numHills == 2 && mSplitTimeCounter >= mSplitThreshold;
-
         int lineChoice = DEFUALT_ANGLE_PICK;
-        if (splitAtHill2 /*&& (mCounter2 < mFinalTurns.length)*/) {
+        if (numHills == 2 && split){
+            long timeDiff = System.currentTimeMillis() - mDecisionTime;
+            lineChoice = 1 - mHill2Decision;
+            if (splitAtHill2 /*&& (mCounter2 < mFinalTurns.length)*/) {
             // Splits after hill 2, choice section
             //lineChoice = mFinalTurns[mCounter2];
-            if (Math.abs(angles[LEFT]) <= 3 * TurnDetector.ANGLE_EPSILON &&
-                Math.abs(angles[RIGHT]) >= ANGLE_SHARP) {
-                lineChoice = RIGHT;
-            } else if (Math.abs(angles[RIGHT]) <= 3 * TurnDetector.ANGLE_EPSILON &&
-                Math.abs(angles[LEFT]) >= ANGLE_SHARP) {
-                lineChoice = LEFT;
-            } else if (turn == TurnDetector.Turn.LEFT) {
-                lineChoice = LEFT;
-            } else if (turn == TurnDetector.Turn.RIGHT){
-                lineChoice = RIGHT;
+                if (Math.abs(angles[LEFT]) <= 1.5 * TurnDetector.ANGLE_EPSILON &&
+                    Math.abs(angles[RIGHT]) >= ANGLE_SHARP) {
+                    lineChoice = RIGHT;
+                    mHill2Decision = lineChoice;
+                    mDecisionTime = System.currentTimeMillis();
+                } else if (Math.abs(angles[RIGHT]) <= 1.5 * TurnDetector.ANGLE_EPSILON &&
+                    Math.abs(angles[LEFT]) >= ANGLE_SHARP) {
+                    lineChoice = LEFT;
+                    mHill2Decision = lineChoice;
+                    mDecisionTime = System.currentTimeMillis();
+                }
             }
 
         } else if (splitAtHill1) {
