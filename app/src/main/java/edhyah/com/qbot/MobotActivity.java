@@ -49,6 +49,7 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
     private double mAngleFinal = 0.0;
     private int mTurnRight = 0;
     private boolean mMadeDecision = false;
+    private boolean mLineIgnore = false;
 
     private double mTunning = 0;
     private double mSpeed = 0;
@@ -64,6 +65,8 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
     private int mCounter2 = 0;
     private int mSplitTimeCounter = 0;
     private int mSplitThreshold = 2;
+    private int mTimeDelay = 3;
+    private int mPrevChoice = LEFT;
 
     private int[] TURNS_2_LEFT = new int[]{LEFT,RIGHT,LEFT,LEFT,RIGHT,RIGHT,LEFT,LEFT,RIGHT,RIGHT,LEFT,LEFT};
     private int[] TURNS_2_RIGHT = new int[]{RIGHT,LEFT,RIGHT,RIGHT,LEFT,LEFT,RIGHT,RIGHT,LEFT,LEFT,RIGHT,RIGHT};
@@ -118,6 +121,7 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         mDimension = (int) mSharedPref.getFloat(MainActivity.PREF_DIMENSION, 2);
         int turningPatternChoice = (int) mSharedPref.getFloat(MainActivity.PREF_TUNNING,0);
         mFinalTurns = TURNS_2015_COURSE;//(turningPatternChoice == 1) ? TURNS_2_RIGHT : TURNS_2_LEFT;
+        mTurnRight = (int) mSharedPref.getFloat(MainActivity.PREF_TURN_DIRECTION,0);
         mSplitThreshold = (int) mSharedPref.getFloat(MainActivity.PREF_STD_SPLITTH,2);
 
         // Hill Detection
@@ -210,7 +214,7 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         if (splitAtHill2 && (mCounter2 < mFinalTurns.length)) {
             // Splits after hill 2, choice section
             lineChoice = mFinalTurns[mCounter2];
-        } else {
+        } else if (split) {
             // Splits after hill 1 for error correction
             if (turn == TurnDetector.Turn.LEFT)
                 lineChoice = LEFT;
