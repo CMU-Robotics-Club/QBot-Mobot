@@ -61,6 +61,7 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
     private double mThreshold = 0.5;
     private int mSamplingPoints = 2000;
     private int mStdThreshold = 25;
+    private long mTimeDifference = 700;
     private int mDimension = 2;
     private int mCounter1 = 0;
     private int mCounter2 = 0;
@@ -215,7 +216,7 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         if (numHills >= 2 && split){
             if (mMadeDecision) {
                 long timeDiff = System.currentTimeMillis() - mDecisionTime;
-                if (timeDiff < 500) return mHill2Decision;
+                if (timeDiff < mTimeDifference) return mHill2Decision;
             }
             if (splitAtHill2 /*&& (mCounter2 < mFinalTurns.length)*/) {
             // Splits after hill 2, choice section
