@@ -21,10 +21,4 @@
         android:text="@string/btn_mobot"
         android:onClick="startMobotActivity" />
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Clear All"
-        android:onClick="clearPref"/>
-
 </LinearLayout>
