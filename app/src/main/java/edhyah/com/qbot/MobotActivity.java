@@ -214,7 +214,6 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
 
         int lineChoice = DEFUALT_ANGLE_PICK;
         if (splitAtHill2 /*&& (mCounter2 < mFinalTurns.length)*/) {
-            mPrevChoice = lineChoice;
             mCounter2 = (mCounter2++) % mTimeDelay;
             // Splits after hill 2, choice section
             //lineChoice = mFinalTurns[mCounter2];
@@ -229,6 +228,7 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
             } else {
                 lineChoice = 1 - mPrevChoice;
             }
+            mPrevChoice = lineChoice;
 
         } else if (splitAtHill1) {
             // Splits after hill 1 for error correction
