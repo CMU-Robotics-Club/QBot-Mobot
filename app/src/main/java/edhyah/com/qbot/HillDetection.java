@@ -21,6 +21,8 @@ public class HillDetection implements SensorEventListener {
     private static final int NUM_AVG_VALS = 10;
     private static final int UPDATE_DELAY_MS = 10;
     private static final int DELAY_UNTIL_NEXT_HILL = 20*1000;
+    private static final int COUNTS_ON_HILL = 40;
+    private float mCountsOnHill = 0;
     private float mHillThreshold = (float)6.5;
     private float[] mPastVals;
     private int mPastValsInd = 0;
@@ -55,16 +57,20 @@ public class HillDetection implements SensorEventListener {
 
                 if (y < mHillThreshold) {
                     onHill = true;
+                    mCountsOnHill++;
                 } else {
                     // Update count if was on hill before and time since last hill is large enough
-                    if (onHill && ((curTime - timeOfLastHill) > DELAY_UNTIL_NEXT_HILL)) {
+                    if (onHill && ((curTime - timeOfLastHill) > DELAY_UNTIL_NEXT_HILL) &&
+                            (mCountsOnHill > COUNTS_ON_HILL)) {
                         timeOfLastHill = curTime;
                         numHillsPassed++;
                     }
+                    mCountsOnHill = 0;
                     onHill = false;
                 }
 
-                Log.i(TAG, Arrays.toString(sensorEvent.values) + " " + onHill);
+                Log.i(TAG, Arrays.toString(sensorEvent.values) + "(" + y + ")\t" + onHill + "\t"
+                    + mCountsOnHill);
             }
         }
     }

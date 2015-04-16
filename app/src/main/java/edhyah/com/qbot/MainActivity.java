@@ -32,11 +32,11 @@ public class MainActivity extends Activity {
         LinearLayout layout = (LinearLayout) findViewById(R.id.main_main);
 
         // Add Bars
-        ParameterBar maxSpeedBar = new ParameterBar(this, "MS", PREF_MAX_SPEED, 30, 0.0, 30.0, 12.0);
+        ParameterBar maxSpeedBar = new ParameterBar(this, "MS", PREF_MAX_SPEED, 30, 0.0, 30.0, 10.0);
         layout.addView(maxSpeedBar);
         ParameterBar tuneBar = new ParameterBar(this, "Tn", PREF_TUNNING, 200, -1.0, 1.0, 0.0);
         layout.addView(tuneBar);
-        ParameterBar threshBar = new ParameterBar(this, "Th", PREF_THRESHOLD, 300, 0.0, 3.0, 1.2);
+        ParameterBar threshBar = new ParameterBar(this, "Th", PREF_THRESHOLD, 300, 0.0, 3.0, 1.1);
         layout.addView(threshBar);
         ParameterBar pidPBar = new ParameterBar(this, "P", PREF_PID_P, 100, 0.0, 1.0, 1.0);
         layout.addView(pidPBar);
@@ -44,7 +44,7 @@ public class MainActivity extends Activity {
         layout.addView(pidIBar);
         ParameterBar pidDBar = new ParameterBar(this, "D", PREF_PID_D, 100, 0.0, 1.0, 0.0);
         layout.addView(pidDBar);
-        ParameterBar dimensionBar = new ParameterBar(this, "RD",PREF_DIMENSION,4,1.0,5.0,2.0);
+        ParameterBar dimensionBar = new ParameterBar(this, "RD",PREF_DIMENSION,4,1.0,5.0,1.0);
         layout.addView(dimensionBar);
         ParameterBar stdThreshBar = new ParameterBar(this,"SdTh",PREF_STD_THRESHOLD,100,0.0,100.0,30.0);
         layout.addView(stdThreshBar);
@@ -52,7 +52,7 @@ public class MainActivity extends Activity {
         layout.addView(turnBar);
         ParameterBar SplitThBar = new ParameterBar(this,"SptTh",PREF_STD_SPLITTH,4,1.0,5.0,2.0);
         layout.addView(SplitThBar);
-        layout.addView(new ParameterBar(this,"HlTh",PREF_HILL_THRESH,100,0.0,10.0,6.5));
+        layout.addView(new ParameterBar(this,"HlTh",PREF_HILL_THRESH,100,0.0,10.0,6.8));
     }
 
 
