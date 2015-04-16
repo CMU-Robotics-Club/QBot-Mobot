@@ -54,7 +54,7 @@ public class MainActivity extends Activity {
         layout.addView(turnBar);
         ParameterBar SplitThBar = new ParameterBar(this,"SptTh",PREF_STD_SPLITTH,4,1.0,5.0,2.0);
         layout.addView(SplitThBar);
-        layout.addView(new ParameterBar(this,"HlTh",PREF_HILL_THRESH,100,0.0,10.0,7));
+        layout.addView(new ParameterBar(this,"HlTh",PREF_HILL_THRESH,100,0.0,10.0,6.3));
 
     }
 
