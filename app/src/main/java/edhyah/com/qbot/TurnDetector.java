@@ -7,7 +7,7 @@ public class TurnDetector {
 
     public enum Turn {RIGHT, LEFT, STRAIGHT};
     private static final double STRAIGHT_ANGLE = 0;
-    private static final double ANGLE_EPSILON = 3;
+    public static final double ANGLE_EPSILON = 3;
     private static final int NUM_PAST_VAL = 25;
     private double[] mPastVals = new double[NUM_PAST_VAL];
     private int mCurInd = 0;
