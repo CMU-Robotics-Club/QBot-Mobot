@@ -49,6 +49,7 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
     private double mAngleFinal = 0.0;
     private int mTurnRight = 0;
     private boolean mMadeDecision = false;
+    private boolean mLineIgnore = false;
 
     private double mTunning = 0;
     private double mSpeed = 0;
@@ -64,6 +65,8 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
     private int mCounter2 = 0;
     private int mSplitTimeCounter = 0;
     private int mSplitThreshold = 2;
+    private int mTimeDelay = 3;
+    private int mPrevChoice = LEFT;
 
     private int[] TURNS_2_LEFT = new int[]{LEFT,RIGHT,LEFT,LEFT,RIGHT,RIGHT,LEFT,LEFT,RIGHT,RIGHT,LEFT,LEFT};
     private int[] TURNS_2_RIGHT = new int[]{RIGHT,LEFT,RIGHT,RIGHT,LEFT,LEFT,RIGHT,RIGHT,LEFT,LEFT,RIGHT,RIGHT};
@@ -117,12 +120,8 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         mStdThreshold = (int) mSharedPref.getFloat(MainActivity.PREF_STD_THRESHOLD,50);
         mDimension = (int) mSharedPref.getFloat(MainActivity.PREF_DIMENSION, 2);
         int turningPatternChoice = (int) mSharedPref.getFloat(MainActivity.PREF_TUNNING,0);
-<<<<<<< Updated upstream
         mFinalTurns = TURNS_2015_COURSE;//(turningPatternChoice == 1) ? TURNS_2_RIGHT : TURNS_2_LEFT;
-=======
         mTurnRight = (int) mSharedPref.getFloat(MainActivity.PREF_TURN_DIRECTION,0);
-        mFinalTurns = (turningPatternChoice == 1) ? TURNS_2_RIGHT : TURNS_2_LEFT;
->>>>>>> Stashed changes
         mSplitThreshold = (int) mSharedPref.getFloat(MainActivity.PREF_STD_SPLITTH,2);
 
         // Hill Detection
@@ -212,22 +211,20 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
 
         int lineChoice = DEFUALT_ANGLE_PICK;
         if (splitAtHill2 /*&& (mCounter2 < mFinalTurns.length)*/) {
+            mPrevChoice = lineChoice;
+            mCounter2 = (mCounter2++) % mTimeDelay;
             // Splits after hill 2, choice section
-            //lineCoice = mFinalTurns[mCounter2];
-            if (!mMadeDecision) {
-                lineChoice = mTurnRight == 1 ? RIGHT : LEFT;
-                mMadeDecision = true;
-            }
+            //lineChoice = mFinalTurns[mCounter2];
             if (Math.abs(angles[LEFT]) <= 2 * TurnDetector.ANGLE_EPSILON &&
-                Math.abs(angles[RIGHT]) >= ANGLE_SHARP) {
+                Math.abs(angles[RIGHT]) >= ANGLE_SHARP && mCounter2 == 0) {
                 lineChoice = RIGHT;
             } else if (Math.abs(angles[RIGHT]) <= 2 * TurnDetector.ANGLE_EPSILON &&
-                Math.abs(angles[LEFT]) >= ANGLE_SHARP) {
+                Math.abs(angles[LEFT]) >= ANGLE_SHARP && mCounter2 == 0) {
                 lineChoice = LEFT;
-            } else if (turn == TurnDetector.Turn.LEFT)
-                lineChoice = LEFT;
-            else if (turn == TurnDetector.Turn.RIGHT) {
-                lineChoice = RIGHT;
+            } else if (mCounter2 != 0) {
+                lineChoice = mPrevChoice;
+            } else {
+                lineChoice = 1 - mPrevChoice;
             }
 
         } else if (splitAtHill1) {
