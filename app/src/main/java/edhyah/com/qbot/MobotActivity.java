@@ -117,12 +117,7 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         mStdThreshold = (int) mSharedPref.getFloat(MainActivity.PREF_STD_THRESHOLD,50);
         mDimension = (int) mSharedPref.getFloat(MainActivity.PREF_DIMENSION, 2);
         int turningPatternChoice = (int) mSharedPref.getFloat(MainActivity.PREF_TUNNING,0);
-<<<<<<< Updated upstream
         mFinalTurns = TURNS_2015_COURSE;//(turningPatternChoice == 1) ? TURNS_2_RIGHT : TURNS_2_LEFT;
-=======
-        mTurnRight = (int) mSharedPref.getFloat(MainActivity.PREF_TURN_DIRECTION,0);
-        mFinalTurns = (turningPatternChoice == 1) ? TURNS_2_RIGHT : TURNS_2_LEFT;
->>>>>>> Stashed changes
         mSplitThreshold = (int) mSharedPref.getFloat(MainActivity.PREF_STD_SPLITTH,2);
 
         // Hill Detection
@@ -176,6 +171,9 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         // On hill decision
         if (onHill) {
             finalAngle = mFilt.onHillFilter(finalAngle);
+        } else if (numHills == 0) {
+            // Slow drive angle in first part too
+            finalAngle = mFilt.beginningFilter(finalAngle);
         }
 
         // Filtering
@@ -218,15 +216,16 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
                 lineChoice = mTurnRight == 1 ? RIGHT : LEFT;
                 mMadeDecision = true;
             }
+
             if (Math.abs(angles[LEFT]) <= 2 * TurnDetector.ANGLE_EPSILON &&
                 Math.abs(angles[RIGHT]) >= ANGLE_SHARP) {
                 lineChoice = RIGHT;
             } else if (Math.abs(angles[RIGHT]) <= 2 * TurnDetector.ANGLE_EPSILON &&
                 Math.abs(angles[LEFT]) >= ANGLE_SHARP) {
                 lineChoice = LEFT;
-            } else if (turn == TurnDetector.Turn.LEFT)
+            } else if (turn == TurnDetector.Turn.LEFT) {
                 lineChoice = LEFT;
-            else if (turn == TurnDetector.Turn.RIGHT) {
+            } else if (turn == TurnDetector.Turn.RIGHT) {
                 lineChoice = RIGHT;
             }
 
