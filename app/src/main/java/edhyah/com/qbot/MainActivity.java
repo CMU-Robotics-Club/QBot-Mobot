@@ -20,7 +20,7 @@ public class MainActivity extends Activity {
     public static final String PREF_PID_D = "edhyah.com.qbot.pref.PID_D";
     public static final String PREF_DIMENSION = "edhyah.com.qbot.pref.DIMENSION";
     public static final String PREF_STD_THRESHOLD = "edhyah.com.qbot.pref.STD_THRESHOLD";
-    public static final String PREF_STD_TURN = "edhyah.com.qbot.pref.STD_TURN";
+    public static final String PREF_TURN_DIRECTION = "edhyah.com.qbot.pref.TURN_DIRECTION";
     public static final String PREF_STD_SPLITTH = "eddyah.com.qbot.pref.SPLITTH";
     public static final String PREF_HILL_THRESH= "eddyah.com.qbot.pref.HILL_THRESH";
 
@@ -48,7 +48,7 @@ public class MainActivity extends Activity {
         layout.addView(dimensionBar);
         ParameterBar stdThreshBar = new ParameterBar(this,"SdTh",PREF_STD_THRESHOLD,100,0.0,100.0,30.0);
         layout.addView(stdThreshBar);
-        ParameterBar turnBar = new ParameterBar(this,"Turn",PREF_STD_TURN,1,0.0,1.0,0.0);
+        ParameterBar turnBar = new ParameterBar(this,"Turn",PREF_TURN_DIRECTION,1,0.0,1.0,0.0);
         layout.addView(turnBar);
         ParameterBar SplitThBar = new ParameterBar(this,"SptTh",PREF_STD_SPLITTH,4,1.0,5.0,2.0);
         layout.addView(SplitThBar);
