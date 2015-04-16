@@ -165,7 +165,7 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         // Update turn with prev angle
         TurnDetector.Turn turn = mTurnDetector.updateTurn(mAngleFinal);
 
-        int lineChoice = pickAngle(split, numHills, turn,angles);
+        int lineChoice = pickAngle(split, numHills, turn);
         double finalAngle = angles[lineChoice];
 
         // On hill decision
@@ -181,7 +181,7 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
 
         // Update UI
         updateAngle(finalAngle);
-        updateAlgParams(mAlgorithm.getResStd(), numHills, split, turn, onHill);
+        updateAlgParams(mAlgorithm.getResStd(), numHills, split, turn, onHill, mCounter2);
 
         addSelectedPoints(img, split, lineChoice);
         addFoundLines(img, finalAngle, angles, split, lineChoice);
@@ -193,7 +193,7 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         return img;
     }
 
-    private int pickAngle(boolean split, int numHills, TurnDetector.Turn turn,double[] angles) {
+    private int pickAngle(boolean split, int numHills, TurnDetector.Turn turn) {
 
         //mSplitTimeCounter needs to be at least 2 for the two lines to become available
         if (split) {
@@ -202,34 +202,15 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
             //Reset mSplitTimeCounter when there is no two lines appear.
             mSplitTimeCounter = 0;
             //And be ready for the next turn.
-            //if (!split && numHills == 2) mCounter2++;
-            //if (!split && numHills == 1) mCounter1++;
+            if (numHills == 2) mCounter2++;
         }
-        boolean splitAtHill1 = split && numHills == 1 && mSplitTimeCounter >= mSplitThreshold;
-        boolean splitAtHill2 = split && numHills == 2 && mSplitTimeCounter >= mSplitThreshold;
+        boolean splitAtHill2 = split && numHills >= 2 && mSplitTimeCounter >= mSplitThreshold;
 
         int lineChoice = DEFUALT_ANGLE_PICK;
-        if (splitAtHill2 /*&& (mCounter2 < mFinalTurns.length)*/) {
+        if (splitAtHill2 && (mCounter2 < mFinalTurns.length)) {
             // Splits after hill 2, choice section
-            //lineCoice = mFinalTurns[mCounter2];
-            if (!mMadeDecision) {
-                lineChoice = mTurnRight == 1 ? RIGHT : LEFT;
-                mMadeDecision = true;
-            }
-
-            if (Math.abs(angles[LEFT]) <= 2 * TurnDetector.ANGLE_EPSILON &&
-                Math.abs(angles[RIGHT]) >= ANGLE_SHARP) {
-                lineChoice = RIGHT;
-            } else if (Math.abs(angles[RIGHT]) <= 2 * TurnDetector.ANGLE_EPSILON &&
-                Math.abs(angles[LEFT]) >= ANGLE_SHARP) {
-                lineChoice = LEFT;
-            } else if (turn == TurnDetector.Turn.LEFT) {
-                lineChoice = LEFT;
-            } else if (turn == TurnDetector.Turn.RIGHT) {
-                lineChoice = RIGHT;
-            }
-
-        } else if (splitAtHill1) {
+            lineChoice = mFinalTurns[mCounter2];
+        } else {
             // Splits after hill 1 for error correction
             if (turn == TurnDetector.Turn.LEFT)
                 lineChoice = LEFT;
@@ -385,13 +366,13 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
     }
 
     private void updateAlgParams(final double st, final int hills, final boolean split,
-                                 final TurnDetector.Turn turn, final boolean onHill){
+                                 final TurnDetector.Turn turn, final boolean onHill, final int splitCnt2){
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 TextView angle = (TextView) findViewById(R.id.std_test);
-                angle.setText(String.format("Std:%.0f Hills:%d(%s) Split:%s Turn:%s",st,hills,
-                        bool2Str(onHill),bool2Str(split),turn));
+                angle.setText(String.format("Std:%.0f Hills:%d(%s) Split:%s(%d) Turn:%s",st,hills,
+                        bool2Str(onHill),bool2Str(split),splitCnt2,turn));
             }
         });
     }

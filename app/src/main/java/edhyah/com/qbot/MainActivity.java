@@ -2,7 +2,9 @@ package edhyah.com.qbot;
 
 import android.content.Intent;
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -52,7 +54,8 @@ public class MainActivity extends Activity {
         layout.addView(turnBar);
         ParameterBar SplitThBar = new ParameterBar(this,"SptTh",PREF_STD_SPLITTH,4,1.0,5.0,2.0);
         layout.addView(SplitThBar);
-        layout.addView(new ParameterBar(this,"HlTh",PREF_HILL_THRESH,100,0.0,10.0,6.8));
+        layout.addView(new ParameterBar(this,"HlTh",PREF_HILL_THRESH,100,0.0,10.0,7));
+
     }
 
 
@@ -81,5 +84,13 @@ public class MainActivity extends Activity {
     public void startMobotActivity(View view) {
         Intent intent = new Intent(this, MobotActivity.class);
         startActivity(intent);
+    }
+
+    public void clearPref(View view) {
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.clear();
+        editor.commit();
+
     }
 }
