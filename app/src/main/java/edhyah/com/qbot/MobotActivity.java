@@ -175,6 +175,9 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         // On hill decision
         if (onHill) {
             finalAngle = mFilt.onHillFilter(finalAngle);
+        } else if (numHills == 0) {
+            // Slow drive angle in first part too
+            finalAngle = mFilt.beginningFilter(finalAngle);
         }
 
         // Filtering

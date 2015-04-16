@@ -12,6 +12,7 @@ public class ParameterFiltering {
     private double PID_I = 0;
     private double PID_D = 0;
     private double HILL_FLT =  .5;
+    private double BEGIN_FLT = .5;
     private static final double[] LP_FLT = {.5, .3, .1, .1};
     private static final double TARGET_VAL = 0;
     private static final String TAG = "ParameterFiltering";
@@ -68,4 +69,7 @@ public class ParameterFiltering {
         return fltVal;
     }
 
+    public double beginningFilter(double finalAngle) {
+        return finalAngle * BEGIN_FLT;
+    }
 }
