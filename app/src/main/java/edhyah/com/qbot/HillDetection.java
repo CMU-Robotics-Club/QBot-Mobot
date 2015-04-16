@@ -18,7 +18,7 @@ public class HillDetection implements SensorEventListener {
     private static final String TAG = "HillDetection";
     private SensorManager senSensorManager;
     private Sensor senAccelerometer;
-    private static final int NUM_AVG_VALS = 10;
+    private static final int NUM_AVG_VALS = 7;
     private static final int UPDATE_DELAY_MS = 10;
     private static final int DELAY_UNTIL_NEXT_HILL = 20*1000;
     private static final int COUNTS_ON_HILL = 40;

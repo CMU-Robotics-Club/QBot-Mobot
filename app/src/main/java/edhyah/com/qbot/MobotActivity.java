@@ -65,6 +65,7 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
 
     private int[] TURNS_2_LEFT = new int[]{LEFT,RIGHT,LEFT,LEFT,RIGHT,RIGHT,LEFT,LEFT,RIGHT,RIGHT,LEFT,LEFT};
     private int[] TURNS_2_RIGHT = new int[]{RIGHT,LEFT,RIGHT,RIGHT,LEFT,LEFT,RIGHT,RIGHT,LEFT,LEFT,RIGHT,RIGHT};
+    private int[] TURNS_2015_COURSE = new int[]{RIGHT, LEFT, RIGHT, RIGHT, LEFT, LEFT, RIGHT, RIGHT, LEFT, RIGHT};
     private int[] mFinalTurns;
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
@@ -114,7 +115,7 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         mStdThreshold = (int) mSharedPref.getFloat(MainActivity.PREF_STD_THRESHOLD,50);
         mDimension = (int) mSharedPref.getFloat(MainActivity.PREF_DIMENSION, 2);
         int turningPatternChoice = (int) mSharedPref.getFloat(MainActivity.PREF_TUNNING,0);
-        mFinalTurns = (turningPatternChoice == 1) ? TURNS_2_RIGHT : TURNS_2_LEFT;
+        mFinalTurns = TURNS_2015_COURSE;//(turningPatternChoice == 1) ? TURNS_2_RIGHT : TURNS_2_LEFT;
         mSplitThreshold = (int) mSharedPref.getFloat(MainActivity.PREF_STD_SPLITTH,2);
 
         // Hill Detection
