@@ -32,7 +32,7 @@ public class MainActivity extends Activity {
         LinearLayout layout = (LinearLayout) findViewById(R.id.main_main);
 
         // Add Bars
-        ParameterBar maxSpeedBar = new ParameterBar(this, "MS", PREF_MAX_SPEED, 30, 0.0, 30.0, 10.0);
+        ParameterBar maxSpeedBar = new ParameterBar(this, "MS", PREF_MAX_SPEED, 30, 0.0, 30.0, 9.0);
         layout.addView(maxSpeedBar);
         ParameterBar tuneBar = new ParameterBar(this, "Tn", PREF_TUNNING, 200, -1.0, 1.0, 0.0);
         layout.addView(tuneBar);
