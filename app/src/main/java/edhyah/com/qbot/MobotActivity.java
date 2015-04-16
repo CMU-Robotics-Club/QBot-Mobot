@@ -66,7 +66,7 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
     private int mSplitTimeCounter = 0;
     private int mSplitThreshold = 2;
     private int mTimeDelay = 3;
-    private int mPrevChoice = LEFT;
+    //private int mPrevChoice = LEFT;
 
     private int[] TURNS_2_LEFT = new int[]{LEFT,RIGHT,LEFT,LEFT,RIGHT,RIGHT,LEFT,LEFT,RIGHT,RIGHT,LEFT,LEFT};
     private int[] TURNS_2_RIGHT = new int[]{RIGHT,LEFT,RIGHT,RIGHT,LEFT,LEFT,RIGHT,RIGHT,LEFT,LEFT,RIGHT,RIGHT};
@@ -214,21 +214,19 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
 
         int lineChoice = DEFUALT_ANGLE_PICK;
         if (splitAtHill2 /*&& (mCounter2 < mFinalTurns.length)*/) {
-            mCounter2 = (mCounter2++) % mTimeDelay;
             // Splits after hill 2, choice section
             //lineChoice = mFinalTurns[mCounter2];
-            if (Math.abs(angles[LEFT]) <= 2 * TurnDetector.ANGLE_EPSILON &&
-                Math.abs(angles[RIGHT]) >= ANGLE_SHARP && mCounter2 == 0) {
+            if (Math.abs(angles[LEFT]) <= 3 * TurnDetector.ANGLE_EPSILON &&
+                Math.abs(angles[RIGHT]) >= ANGLE_SHARP) {
                 lineChoice = RIGHT;
-            } else if (Math.abs(angles[RIGHT]) <= 2 * TurnDetector.ANGLE_EPSILON &&
-                Math.abs(angles[LEFT]) >= ANGLE_SHARP && mCounter2 == 0) {
+            } else if (Math.abs(angles[RIGHT]) <= 3 * TurnDetector.ANGLE_EPSILON &&
+                Math.abs(angles[LEFT]) >= ANGLE_SHARP) {
                 lineChoice = LEFT;
-            } else if (mCounter2 != 0) {
-                lineChoice = mPrevChoice;
-            } else {
-                lineChoice = 1 - mPrevChoice;
+            } else if (turn == TurnDetector.Turn.LEFT) {
+                lineChoice = LEFT;
+            } else if (turn == TurnDetector.Turn.RIGHT){
+                lineChoice = RIGHT;
             }
-            mPrevChoice = lineChoice;
 
         } else if (splitAtHill1) {
             // Splits after hill 1 for error correction
