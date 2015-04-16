@@ -22,7 +22,7 @@ public class HillDetection implements SensorEventListener {
     private static final int NUM_AVG_VALS = 10;
     private static final int UPDATE_DELAY_MS = 10;
     private static final int DELAY_UNTIL_NEXT_HILL = 20*1000;
-    private static final int COUNTS_ON_HILL = 20;
+    private static final int COUNTS_ON_HILL = 10;
     private float mCountsOnHill = 0;
     private float mHillThreshold = (float)6.5;
     private float[] mPastVals;
