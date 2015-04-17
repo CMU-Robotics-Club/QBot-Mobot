@@ -50,7 +50,7 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
     private int mTurnRight = 0;
     private boolean mMadeDecision = false;
     private boolean mLineIgnore = false;
-    private int mHill2Decision = LEFT;
+    private int mHill2Decision = RIGHT;
 
     private double mTunning = 0;
     private double mSpeed = 0;
@@ -61,12 +61,13 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
     private double mThreshold = 0.5;
     private int mSamplingPoints = 2000;
     private int mStdThreshold = 25;
-    private long mTimeDifference = 700;
+    private long mTimeDifference = 4000;
     private int mDimension = 2;
     private int mCounter1 = 0;
     private int mCounter2 = 0;
     private int mSplitTimeCounter = 0;
     private int mSplitThreshold = 2;
+    private boolean mFirstDecision = true;
     private long mDecisionTime = 0;
     //private int mPrevChoice = LEFT;
 
@@ -186,7 +187,7 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         finalAngle = mFilt.filter(finalAngle);
 
         // Update UI
-        updateAngle(finalAngle);
+        updateAngle(finalAngle, lineChoice);
         updateAlgParams(mAlgorithm.getResStd(), numHills, split, turn, onHill, mCounter2);
 
         addSelectedPoints(img, split, lineChoice);
@@ -213,32 +214,39 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
         boolean splitAtHill2 = split && numHills >= 2 && mSplitTimeCounter >= mSplitThreshold;
 
         int lineChoice = DEFUALT_ANGLE_PICK;
-        if (numHills >= 2 && split){
+        if (numHills >= 2){
             if (mMadeDecision) {
                 long timeDiff = System.currentTimeMillis() - mDecisionTime;
                 if (timeDiff < mTimeDifference) return mHill2Decision;
             }
-            if (splitAtHill2 /*&& (mCounter2 < mFinalTurns.length)*/) {
-            // Splits after hill 2, choice section
-            //lineChoice = mFinalTurns[mCounter2];
-                if (Math.abs(angles[LEFT]) <= 1.5 * TurnDetector.ANGLE_EPSILON &&
-                    Math.abs(angles[RIGHT]) >= ANGLE_SHARP) {
-                    lineChoice = RIGHT;
-                    mHill2Decision = lineChoice;
-                    mDecisionTime = System.currentTimeMillis();
-                    mMadeDecision = true;
-                } else if (Math.abs(angles[RIGHT]) <= 1.5 * TurnDetector.ANGLE_EPSILON &&
-                    Math.abs(angles[LEFT]) >= ANGLE_SHARP) {
-                    lineChoice = LEFT;
-                    mHill2Decision = lineChoice;
-                    mDecisionTime = System.currentTimeMillis();
-                    mMadeDecision = true;
-                } else if (mMadeDecision) {
-                    lineChoice = 1 - mHill2Decision;
-                    mDecisionTime = System.currentTimeMillis();
-                }
+        }
+        if (splitAtHill2){
+            if (mMadeDecision) {
+                mHill2Decision = 1 - mHill2Decision;
+                mMadeDecision = false;
             }
-
+            if (Math.abs(angles[LEFT]) <= 3 * TurnDetector.ANGLE_EPSILON && mFirstDecision) {
+                mMadeDecision = true;
+                mHill2Decision = RIGHT;
+                mFirstDecision = false;
+            }
+            if (Math.abs(angles[LEFT]) <= 2 * TurnDetector.ANGLE_EPSILON &&
+                Math.abs(angles[RIGHT]) >= ANGLE_SHARP) {
+                mHill2Decision = RIGHT;
+                mDecisionTime = System.currentTimeMillis();
+                mMadeDecision = true;
+            } else if (Math.abs(angles[RIGHT]) <= 2 * TurnDetector.ANGLE_EPSILON &&
+                Math.abs(angles[LEFT]) >= ANGLE_SHARP) {
+                mHill2Decision = LEFT;
+                mDecisionTime = System.currentTimeMillis();
+                mMadeDecision = true;
+            } else {
+                mHill2Decision = RIGHT;
+                mMadeDecision = true;
+                mDecisionTime = System.currentTimeMillis();
+                return mHill2Decision;
+            }
+            lineChoice = mHill2Decision;
         } else if (splitAtHill1) {
             // Splits after hill 1 for error correction
             if (turn == TurnDetector.Turn.LEFT)
@@ -384,12 +392,12 @@ public class MobotActivity extends IOIOActivity implements CameraBridgeViewBase.
 
     //------------ Updating View -------------------------------------------
 
-    private void updateAngle(final Double a){
+    private void updateAngle(final Double a,final int choice){
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 TextView angle = (TextView) findViewById(R.id.angle_test);
-                angle.setText(String.format("Angle: %.2f", a));
+                angle.setText(String.format("Angle: %.2f,D:%d,S:%d",a,choice,mHill2Decision));
             }
         });
     }
